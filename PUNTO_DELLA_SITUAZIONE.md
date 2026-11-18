@@ -41,8 +41,9 @@ Aggiornato: 18/11/2026
 - [x] Copia notturna su OneDrive provata a mano: funziona. **Manca la programmazione**: l'utente deve lanciare
       `copia notturna/Attiva_copia_notturna.bat`.
 - [x] App vera collegata al database aperta col link del gestore: nessuna famiglia ancora, nessun errore.
-- [ ] Pubblicazione della pagina: GitHub Pages richiede repository **pubblico** con l'account gratuito
-      (nel codice non ci sono segreti né dati; la chiave publishable è pubblica per costruzione); in alternativa Netlify. Da decidere con l'utente.
+- [x] Pubblicata su GitHub Pages: **https://gvasta62.github.io/albero-di-famiglia/** (18/11/2026). Repository reso
+      pubblico con l'assenso dell'utente; `.github/workflows/pubblica.yml` ripubblica `app/` a ogni push su master.
+      Link del gestore in `segreti/link_gestore.txt` e collegamento `segreti/Albero di famiglia - gestore.url`.
 - [ ] Prima famiglia vera da creare dal link del gestore (dopo la pubblicazione, così i link sono quelli giusti).
 - [ ] Video-guida (dopo la messa in linea, oppure girato in modalità prova con la famiglia inventata).
 
