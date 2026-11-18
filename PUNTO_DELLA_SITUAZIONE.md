@@ -45,7 +45,11 @@ Aggiornato: 18/11/2026
       pubblico con l'assenso dell'utente; `.github/workflows/pubblica.yml` ripubblica `app/` a ogni push su master.
       Link del gestore in `segreti/link_gestore.txt` e collegamento `segreti/Albero di famiglia - gestore.url`.
 - [ ] Prima famiglia vera da creare dal link del gestore (dopo la pubblicazione, così i link sono quelli giusti).
-- [ ] Video-guida (dopo la messa in linea, oppure girato in modalità prova con la famiglia inventata).
+- [x] Video-guida in bozza: `Albero di famiglia - Video guida (bozza).mp4` (2 min 53 s, 1920x1080), voce ElevenLabs
+      "peppe02" modello eleven_v4, registrazione del sito vero in modalità prova (famiglia Rossi inventata).
+      **Da far approvare all'utente: voce e musica** (tre proposte in `guida video/prove musica/`; nella bozza c'è la 1, provvisoria).
+      Dopo la scelta: `MUSICA` in `copione.py`, poi `python monta.py` (senza --bozza) per il file definitivo.
+- [x] Istruzioni illustrate: `Albero di famiglia - Istruzioni.pdf` (2 pagine A4, 10 passi con schermate).
 
 ## Punti aperti
 - Importazione da una copia OneDrive in caso di perdita totale del progetto Supabase: non c'è ancora
@@ -56,3 +60,6 @@ Aggiornato: 18/11/2026
   (lo script si può rieseguire: non cancella dati). Lo copio negli appunti con PowerShell `Set-Clipboard`.
 - Per provare la parte copie serali senza aspettare la sera: `select public._copia_serale();` nello SQL Editor.
 - Con l'URL valorizzato l'app non è più in modalità prova: per la famiglia inventata aprire `index.html?prova`.
+- Video: script in `guida video/` (copione.py testi, voce.py, registra.py, monta.py, istruzioni.py; Rigenera_video.bat fa tutto).
+  Il lavoro intermedio sta in %TEMP%lbero_video_lavoro (fuori da OneDrive). La registrazione usa lo screencast
+  CDP di Chrome a 780x1688: `record_video` di Playwright riprendeva solo l'angolo a 1x.
