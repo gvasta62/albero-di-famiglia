@@ -8,7 +8,7 @@ VOCE_ID = "vsCRUc02ddcl96KTjfTQ"      # "peppe02" su ElevenLabs (voce clonata de
 MODELLO = "eleven_v4"                  # "v4"
 IMPOSTAZIONI = {"stability": 0.5, "similarity_boost": 0.75, "style": 0.0, "use_speaker_boost": True, "speed": 1.0}
 
-MUSICA = "Carefree---Happy-Piano-Kids-Playful-Fun_AdobeStock_372203894.wav"   # PROVVISORIA: la sceglie l'utente fra le tre proposte
+MUSICA = "Carefree---Happy-Piano-Kids-Playful-Fun_AdobeStock_372203894.wav"   # scelta dall'utente (prova 1)
 
 TITOLO = "Albero di famiglia"
 SOTTOTITOLO = "Come si usa, passo per passo"

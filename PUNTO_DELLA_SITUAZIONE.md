@@ -45,10 +45,9 @@ Aggiornato: 18/11/2026
       pubblico con l'assenso dell'utente; `.github/workflows/pubblica.yml` ripubblica `app/` a ogni push su master.
       Link del gestore in `segreti/link_gestore.txt` e collegamento `segreti/Albero di famiglia - gestore.url`.
 - [ ] Prima famiglia vera da creare dal link del gestore (dopo la pubblicazione, così i link sono quelli giusti).
-- [x] Video-guida in bozza: `Albero di famiglia - Video guida (bozza).mp4` (2 min 53 s, 1920x1080), voce ElevenLabs
-      "peppe02" modello eleven_v4, registrazione del sito vero in modalità prova (famiglia Rossi inventata).
-      **Da far approvare all'utente: voce e musica** (tre proposte in `guida video/prove musica/`; nella bozza c'è la 1, provvisoria).
-      Dopo la scelta: `MUSICA` in `copione.py`, poi `python monta.py` (senza --bozza) per il file definitivo.
+- [x] Video-guida definitivo: `Albero di famiglia - Video guida.mp4` (2 min 53 s, 1920x1080), voce ElevenLabs
+      "peppe02" modello eleven_v4, musica Carefree Happy Piano (prova 1, scelta dall'utente il 18/11/2026).
+      Registrazione del sito vero in modalità prova (famiglia Rossi inventata). Resta accanto la bozza.
 - [x] Istruzioni illustrate: `Albero di famiglia - Istruzioni.pdf` (2 pagine A4, 10 passi con schermate).
 
 ## Punti aperti
