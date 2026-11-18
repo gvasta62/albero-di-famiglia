@@ -64,11 +64,12 @@ const MESSAGGI = {
   copia_non_trovata: 'Questa copia non è più disponibile.',
   conferma_errata: 'Il nome scritto non corrisponde: non è stato eliminato nulla.',
   famiglia_non_trovata: 'Famiglia non trovata.',
+  check_constraint: 'Un dato non è scritto nel formato giusto (per esempio una data). Controlla e riprova.',
   rete: 'Nessuna connessione, oppure il servizio non risponde. Riprova tra poco.'
 };
 function messaggioErrore(e) {
   const m = String((e && e.message) || e || '');
-  for (const k of Object.keys(MESSAGGI)) if (m.includes(k)) return MESSAGGI[k];
+  for (const k of Object.keys(MESSAGGI)) if (m.replace(/ /g, '_').includes(k)) return MESSAGGI[k];
   return 'Qualcosa non ha funzionato. Riprova. (' + m.slice(0, 120) + ')';
 }
 

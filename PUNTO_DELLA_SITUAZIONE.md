@@ -29,16 +29,29 @@ Aggiornato: 18/11/2026
       nome, albero, scheda, modifica con foto e ritaglio, errore data, aggiunta figlio (collegato a entrambi
       i genitori), elenco, Novità con annullamento, copie serali con "rimetti com'era", invito con QR,
       gestore con creazione di una famiglia nuova (vuota e separata). Nessun errore nella pagina.
-- [x] `database/01_struttura.sql` scritto. **NON ancora eseguito su un PostgreSQL vero**: il controllo automatico
-      di Claude Code ha bloccato l'avvio di un PostgreSQL portatile sul PC. Va verificato su Supabase al primo
-      caricamento (eseguire, poi provare i link).
-- [x] Copia notturna su OneDrive scritta (`copia notturna/`), non ancora provata (manca il database).
-- [ ] Progetto Supabase da creare (serve l'account dell'utente).
+- [x] Supabase: progetto `elmvqzftepsvharujrms` (https://elmvqzftepsvharujrms.supabase.co), creato dall'utente.
+      `01_struttura.sql` e `segreti/02_chiave_gestore.sql` eseguiti dall'utente nello SQL Editor (18/11/2026).
+      URL e chiave publishable in `app/config.js` e `segreti/collegamento.json`.
+- [x] Prova dal vivo di tutte le funzioni (39 controlli): famiglie, chiavi e ruoli, persone con foto, date parziali,
+      legami e rifiuti (circolare, stessa persona), registro e annullamenti, rinomina, nuovo invito e nuovo referente,
+      esportazione, copie serali, recupero di una persona, ripristino completo con copia "prima del ripristino",
+      eliminazione della famiglia. Trovato e corretto un errore: la variabile `a` era ambigua con la colonna `a`
+      di `relazioni` (rinominata `acc` in tutte le funzioni).
+- [x] pg_cron attivo: lavoro `albero-copia-serale` alle `0 21 * * *` (UTC).
+- [x] Copia notturna su OneDrive provata a mano: funziona. **Manca la programmazione**: l'utente deve lanciare
+      `copia notturna/Attiva_copia_notturna.bat`.
+- [x] App vera collegata al database aperta col link del gestore: nessuna famiglia ancora, nessun errore.
 - [ ] Pubblicazione della pagina: GitHub Pages richiede repository **pubblico** con l'account gratuito
-      (nel codice non ci sono segreti né dati); in alternativa Netlify/Cloudflare Pages. Da decidere con l'utente.
+      (nel codice non ci sono segreti né dati; la chiave publishable è pubblica per costruzione); in alternativa Netlify. Da decidere con l'utente.
+- [ ] Prima famiglia vera da creare dal link del gestore (dopo la pubblicazione, così i link sono quelli giusti).
 - [ ] Video-guida (dopo la messa in linea, oppure girato in modalità prova con la famiglia inventata).
 
 ## Punti aperti
 - Importazione da una copia OneDrive in caso di perdita totale del progetto Supabase: non c'è ancora
   una funzione `gestore_importa`. I file JSON contengono tutto il necessario.
-- Verificare che pg_cron sia attivabile dallo SQL Editor sul piano gratuito (di solito sì).
+
+## Note per chi riprende
+- Senza access token Supabase: ogni modifica a `database/01_struttura.sql` va rieseguita dall'utente nello SQL Editor
+  (lo script si può rieseguire: non cancella dati). Lo copio negli appunti con PowerShell `Set-Clipboard`.
+- Per provare la parte copie serali senza aspettare la sera: `select public._copia_serale();` nello SQL Editor.
+- Con l'URL valorizzato l'app non è più in modalità prova: per la famiglia inventata aprire `index.html?prova`.

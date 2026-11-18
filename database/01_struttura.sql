@@ -199,25 +199,25 @@ end $$;
 
 create or replace function albero_carica(p_chiave text) returns jsonb
 language plpgsql security definer set search_path = public, extensions as $$
-declare a record;
+declare acc record;
 begin
-  select * into a from _accesso(p_chiave);
+  select * into acc from _accesso(p_chiave);
   return jsonb_build_object(
-    'famiglia', (select jsonb_build_object('id', f.id, 'nome', f.nome) from famiglie f where f.id = a.fid),
-    'ruolo', a.ruolo,
-    'invito', case when a.ruolo = 'referente' then (select f.chiave from famiglie f where f.id = a.fid) end,
+    'famiglia', (select jsonb_build_object('id', f.id, 'nome', f.nome) from famiglie f where f.id = acc.fid),
+    'ruolo', acc.ruolo,
+    'invito', case when acc.ruolo = 'referente' then (select f.chiave from famiglie f where f.id = acc.fid) end,
     'persone', coalesce((select jsonb_agg(to_jsonb(p) - 'famiglia_id' order by p.cognome, p.nome)
-                         from persone p where p.famiglia_id = a.fid), '[]'::jsonb),
+                         from persone p where p.famiglia_id = acc.fid), '[]'::jsonb),
     'relazioni', coalesce((select jsonb_agg(to_jsonb(r) - 'famiglia_id')
-                           from relazioni r where r.famiglia_id = a.fid), '[]'::jsonb));
+                           from relazioni r where r.famiglia_id = acc.fid), '[]'::jsonb));
 end $$;
 
 create or replace function albero_foto(p_chiave text, p_foto_id uuid) returns text
 language plpgsql security definer set search_path = public, extensions as $$
-declare a record; d text;
+declare acc record; d text;
 begin
-  select * into a from _accesso(p_chiave);
-  select x.dati into d from foto x where x.id = p_foto_id and x.famiglia_id = a.fid;
+  select * into acc from _accesso(p_chiave);
+  select x.dati into d from foto x where x.id = p_foto_id and x.famiglia_id = acc.fid;
   return coalesce(d, '');
 end $$;
 
@@ -229,14 +229,14 @@ create or replace function albero_salva_persona(p_chiave text, p_chi text, p_per
 returns uuid
 language plpgsql security definer set search_path = public, extensions as $$
 declare
-  a record;
+  acc record;
   v_id uuid := nullif(p_persona->>'id', '')::uuid;
   v_prima persone;
   v_dopo persone;
   v_foto_id uuid;
   v_chi text := _chi(p_chi);
 begin
-  select * into a from _accesso(p_chiave);
+  select * into acc from _accesso(p_chiave);
   if coalesce(trim(p_persona->>'nome'), '') = '' then
     raise exception 'nome_mancante';
   end if;
@@ -248,13 +248,13 @@ begin
   end if;
 
   if coalesce(p_foto, '') <> '' then
-    insert into foto(famiglia_id, dati) values (a.fid, p_foto) returning id into v_foto_id;
+    insert into foto(famiglia_id, dati) values (acc.fid, p_foto) returning id into v_foto_id;
   end if;
 
   if v_id is null then
     insert into persone(famiglia_id, nome, cognome, sesso, data_nascita, luogo_nascita, deceduto,
                         data_morte, note, miniatura, foto_id, creato_da, aggiornato_da)
-    values (a.fid,
+    values (acc.fid,
             trim(p_persona->>'nome'),
             coalesce(trim(p_persona->>'cognome'), ''),
             coalesce(p_persona->>'sesso', ''),
@@ -267,11 +267,11 @@ begin
             v_foto_id, v_chi, v_chi)
     returning * into v_dopo;
     insert into registro(famiglia_id, chi, azione, descrizione)
-    values (a.fid, v_chi, 'aggiunta_persona', 'Aggiunta ' || _nome_persona(v_dopo));
+    values (acc.fid, v_chi, 'aggiunta_persona', 'Aggiunta ' || _nome_persona(v_dopo));
     return v_dopo.id;
   end if;
 
-  select * into v_prima from persone where id = v_id and famiglia_id = a.fid for update;
+  select * into v_prima from persone where id = v_id and famiglia_id = acc.fid for update;
   if not found then
     raise exception 'persona_non_trovata';
   end if;
@@ -297,7 +297,7 @@ begin
   returning * into v_dopo;
 
   insert into registro(famiglia_id, chi, azione, descrizione, prima)
-  values (a.fid, v_chi, 'modifica_persona',
+  values (acc.fid, v_chi, 'modifica_persona',
           'Modificata ' || _nome_persona(v_dopo)
             || case when p_foto is null then '' when p_foto = '' then ' (tolta la foto)' else ' (nuova foto)' end,
           jsonb_build_object('persona', to_jsonb(v_prima), 'foto_cambiata', p_foto is not null));
@@ -306,15 +306,15 @@ end $$;
 
 create or replace function albero_elimina_persona(p_chiave text, p_chi text, p_id uuid) returns void
 language plpgsql security definer set search_path = public, extensions as $$
-declare a record; v persone;
+declare acc record; v persone;
 begin
-  select * into a from _accesso(p_chiave);
-  select * into v from persone where id = p_id and famiglia_id = a.fid for update;
+  select * into acc from _accesso(p_chiave);
+  select * into v from persone where id = p_id and famiglia_id = acc.fid for update;
   if not found then
     raise exception 'persona_non_trovata';
   end if;
   insert into registro(famiglia_id, chi, azione, descrizione, prima)
-  values (a.fid, _chi(p_chi), 'elimina_persona', 'Eliminata ' || _nome_persona(v),
+  values (acc.fid, _chi(p_chi), 'elimina_persona', 'Eliminata ' || _nome_persona(v),
           jsonb_build_object('persona', to_jsonb(v),
                              'relazioni', coalesce((select jsonb_agg(to_jsonb(r)) from relazioni r
                                                     where r.da = p_id or r.a = p_id), '[]'::jsonb)));
@@ -327,17 +327,17 @@ create or replace function albero_salva_relazione(p_chiave text, p_chi text, p_t
                                                   p_da uuid, p_a uuid, p_dettaglio text default '')
 returns uuid
 language plpgsql security definer set search_path = public, extensions as $$
-declare a record; v_id uuid; v_da uuid := p_da; v_a uuid := p_a; n1 text; n2 text;
+declare acc record; v_id uuid; v_da uuid := p_da; v_a uuid := p_a; n1 text; n2 text;
 begin
-  select * into a from _accesso(p_chiave);
+  select * into acc from _accesso(p_chiave);
   if p_tipo not in ('genitore', 'coppia') then
     raise exception 'tipo_non_valido';
   end if;
   if p_da = p_a then
     raise exception 'stessa_persona';
   end if;
-  select _nome_persona(p) into n1 from persone p where p.id = p_da and p.famiglia_id = a.fid;
-  select _nome_persona(p) into n2 from persone p where p.id = p_a and p.famiglia_id = a.fid;
+  select _nome_persona(p) into n1 from persone p where p.id = p_da and p.famiglia_id = acc.fid;
+  select _nome_persona(p) into n2 from persone p where p.id = p_a and p.famiglia_id = acc.fid;
   if n1 is null or n2 is null then
     raise exception 'persona_non_trovata';
   end if;
@@ -352,12 +352,12 @@ begin
   end if;
 
   insert into relazioni(famiglia_id, tipo, da, a, dettaglio)
-  values (a.fid, p_tipo, v_da, v_a, left(coalesce(p_dettaglio, ''), 120))
+  values (acc.fid, p_tipo, v_da, v_a, left(coalesce(p_dettaglio, ''), 120))
   on conflict (tipo, da, a) do update set dettaglio = excluded.dettaglio
   returning id into v_id;
 
   insert into registro(famiglia_id, chi, azione, descrizione)
-  values (a.fid, _chi(p_chi), 'aggiunta_relazione',
+  values (acc.fid, _chi(p_chi), 'aggiunta_relazione',
           case when p_tipo = 'genitore' then n1 || ' indicato come genitore di ' || n2
                else n1 || ' e ' || n2 || ' indicati come coppia' end);
   return v_id;
@@ -365,17 +365,17 @@ end $$;
 
 create or replace function albero_elimina_relazione(p_chiave text, p_chi text, p_id uuid) returns void
 language plpgsql security definer set search_path = public, extensions as $$
-declare a record; r relazioni; n1 text; n2 text;
+declare acc record; r relazioni; n1 text; n2 text;
 begin
-  select * into a from _accesso(p_chiave);
-  select * into r from relazioni where id = p_id and famiglia_id = a.fid;
+  select * into acc from _accesso(p_chiave);
+  select * into r from relazioni where id = p_id and famiglia_id = acc.fid;
   if not found then
     raise exception 'legame_non_trovato';
   end if;
   select _nome_persona(p) into n1 from persone p where p.id = r.da;
   select _nome_persona(p) into n2 from persone p where p.id = r.a;
   insert into registro(famiglia_id, chi, azione, descrizione, prima)
-  values (a.fid, _chi(p_chi), 'elimina_relazione',
+  values (acc.fid, _chi(p_chi), 'elimina_relazione',
           case when r.tipo = 'genitore' then 'Tolto il legame: ' || n1 || ' genitore di ' || n2
                else 'Tolto il legame di coppia tra ' || n1 || ' e ' || n2 end,
           to_jsonb(r));
@@ -386,24 +386,24 @@ end $$;
 
 create or replace function albero_registro(p_chiave text) returns jsonb
 language plpgsql security definer set search_path = public, extensions as $$
-declare a record;
+declare acc record;
 begin
-  select * into a from _accesso(p_chiave);
+  select * into acc from _accesso(p_chiave);
   return coalesce((
     select jsonb_agg(jsonb_build_object(
              'id', r.id, 'quando', r.quando, 'chi', r.chi, 'azione', r.azione,
              'descrizione', r.descrizione,
              'annullabile', r.prima is not null and not r.ripristinato,
              'annullato', r.ripristinato) order by r.id desc)
-    from (select * from registro where famiglia_id = a.fid order by id desc limit 300) r), '[]'::jsonb);
+    from (select * from registro where famiglia_id = acc.fid order by id desc limit 300) r), '[]'::jsonb);
 end $$;
 
 create or replace function albero_ripristina(p_chiave text, p_chi text, p_id bigint) returns void
 language plpgsql security definer set search_path = public, extensions as $$
-declare a record; v registro; vp persone; cambiata boolean;
+declare acc record; v registro; vp persone; cambiata boolean;
 begin
-  select * into a from _accesso(p_chiave);
-  select * into v from registro where id = p_id and famiglia_id = a.fid for update;
+  select * into acc from _accesso(p_chiave);
+  select * into v from registro where id = p_id and famiglia_id = acc.fid for update;
   if not found or v.prima is null or v.ripristinato then
     raise exception 'non_annullabile';
   end if;
@@ -417,8 +417,8 @@ begin
     insert into persone select vp.* on conflict (id) do nothing;
     insert into relazioni
       select x.* from jsonb_populate_recordset(null::relazioni, v.prima->'relazioni') x
-      where exists (select 1 from persone p where p.id = x.da and p.famiglia_id = a.fid)
-        and exists (select 1 from persone p where p.id = x.a and p.famiglia_id = a.fid)
+      where exists (select 1 from persone p where p.id = x.da and p.famiglia_id = acc.fid)
+        and exists (select 1 from persone p where p.id = x.a and p.famiglia_id = acc.fid)
     on conflict do nothing;
 
   elsif v.azione = 'modifica_persona' then
@@ -435,7 +435,7 @@ begin
       miniatura = case when cambiata then vp.miniatura else p.miniatura end,
       foto_id   = case when cambiata then vp.foto_id   else p.foto_id   end,
       aggiornato_da = _chi(p_chi), aggiornato_il = now()
-    where p.id = vp.id and p.famiglia_id = a.fid;
+    where p.id = vp.id and p.famiglia_id = acc.fid;
     if not found then
       raise exception 'persona_non_trovata';
     end if;
@@ -443,8 +443,8 @@ begin
   elsif v.azione = 'elimina_relazione' then
     insert into relazioni
       select x.* from jsonb_populate_record(null::relazioni, v.prima) x
-      where exists (select 1 from persone p where p.id = x.da and p.famiglia_id = a.fid)
-        and exists (select 1 from persone p where p.id = x.a and p.famiglia_id = a.fid)
+      where exists (select 1 from persone p where p.id = x.da and p.famiglia_id = acc.fid)
+        and exists (select 1 from persone p where p.id = x.a and p.famiglia_id = acc.fid)
     on conflict do nothing;
     if not found then
       raise exception 'persona_non_trovata';
@@ -455,29 +455,29 @@ begin
 
   update registro set ripristinato = true where id = p_id;
   insert into registro(famiglia_id, chi, azione, descrizione)
-  values (a.fid, _chi(p_chi), 'annullamento', 'Annullato: ' || v.descrizione);
+  values (acc.fid, _chi(p_chi), 'annullamento', 'Annullato: ' || v.descrizione);
 end $$;
 
 -- ---------------------------------------------------------------- copie serali
 
 create or replace function albero_copie(p_chiave text) returns jsonb
 language plpgsql security definer set search_path = public, extensions as $$
-declare a record;
+declare acc record;
 begin
-  select * into a from _accesso(p_chiave);
+  select * into acc from _accesso(p_chiave);
   return coalesce((
     select jsonb_agg(jsonb_build_object(
              'id', c.id, 'giorno', c.giorno, 'creata_il', c.creata_il, 'motivo', c.motivo,
              'persone', jsonb_array_length(c.dati->'persone')) order by c.creata_il desc)
-    from copie c where c.famiglia_id = a.fid), '[]'::jsonb);
+    from copie c where c.famiglia_id = acc.fid), '[]'::jsonb);
 end $$;
 
 create or replace function albero_copia(p_chiave text, p_copia_id bigint) returns jsonb
 language plpgsql security definer set search_path = public, extensions as $$
-declare a record; d jsonb;
+declare acc record; d jsonb;
 begin
-  select * into a from _accesso(p_chiave);
-  select c.dati into d from copie c where c.id = p_copia_id and c.famiglia_id = a.fid;
+  select * into acc from _accesso(p_chiave);
+  select c.dati into d from copie c where c.id = p_copia_id and c.famiglia_id = acc.fid;
   if d is null then
     raise exception 'copia_non_trovata';
   end if;
@@ -488,10 +488,10 @@ end $$;
 create or replace function albero_ripristina_persona(p_chiave text, p_chi text, p_copia_id bigint, p_persona_id uuid)
 returns void
 language plpgsql security definer set search_path = public, extensions as $$
-declare a record; d jsonb; vp persone; esisteva boolean;
+declare acc record; d jsonb; vp persone; esisteva boolean;
 begin
-  select * into a from _accesso(p_chiave);
-  select c.dati into d from copie c where c.id = p_copia_id and c.famiglia_id = a.fid;
+  select * into acc from _accesso(p_chiave);
+  select c.dati into d from copie c where c.id = p_copia_id and c.famiglia_id = acc.fid;
   if d is null then
     raise exception 'copia_non_trovata';
   end if;
@@ -499,7 +499,7 @@ begin
   if vp.id is null then
     raise exception 'persona_non_trovata';
   end if;
-  vp.famiglia_id := a.fid;
+  vp.famiglia_id := acc.fid;
   if vp.foto_id is not null and not exists (select 1 from foto where id = vp.foto_id) then
     vp.foto_id := null;
     vp.miniatura := '';
@@ -507,7 +507,7 @@ begin
   esisteva := exists (select 1 from persone where id = vp.id);
   if esisteva then
     insert into registro(famiglia_id, chi, azione, descrizione, prima)
-    select a.fid, _chi(p_chi), 'modifica_persona',
+    select acc.fid, _chi(p_chi), 'modifica_persona',
            'Rimessa com''era il ' || to_char((select giorno from copie where id = p_copia_id), 'DD/MM/YYYY') || ': ' || _nome_persona(p),
            jsonb_build_object('persona', to_jsonb(p), 'foto_cambiata', true)
     from persone p where p.id = vp.id;
@@ -517,51 +517,51 @@ begin
       deceduto = vp.deceduto, data_morte = vp.data_morte, note = vp.note,
       miniatura = vp.miniatura, foto_id = vp.foto_id,
       aggiornato_da = _chi(p_chi), aggiornato_il = now()
-    where p.id = vp.id and p.famiglia_id = a.fid;
+    where p.id = vp.id and p.famiglia_id = acc.fid;
   else
     insert into persone select vp.*;
     insert into registro(famiglia_id, chi, azione, descrizione)
-    values (a.fid, _chi(p_chi), 'aggiunta_persona',
+    values (acc.fid, _chi(p_chi), 'aggiunta_persona',
             'Recuperata dalla copia del ' || to_char((select giorno from copie where id = p_copia_id), 'DD/MM/YYYY') || ': ' || _nome_persona(vp));
   end if;
   insert into relazioni
     select x.* from jsonb_populate_recordset(null::relazioni, d->'relazioni') x
     where (x.da = vp.id or x.a = vp.id)
-      and exists (select 1 from persone p where p.id = x.da and p.famiglia_id = a.fid)
-      and exists (select 1 from persone p where p.id = x.a and p.famiglia_id = a.fid)
+      and exists (select 1 from persone p where p.id = x.da and p.famiglia_id = acc.fid)
+      and exists (select 1 from persone p where p.id = x.a and p.famiglia_id = acc.fid)
   on conflict do nothing;
 end $$;
 
 -- rimette TUTTO l'albero com'era nella copia (solo referente); prima salva lo stato attuale
 create or replace function albero_ripristina_copia(p_chiave text, p_chi text, p_copia_id bigint) returns void
 language plpgsql security definer set search_path = public, extensions as $$
-declare a record; d jsonb; g date;
+declare acc record; d jsonb; g date;
 begin
-  select * into a from _accesso(p_chiave);
-  if a.ruolo <> 'referente' then
+  select * into acc from _accesso(p_chiave);
+  if acc.ruolo <> 'referente' then
     raise exception 'serve_referente';
   end if;
-  select c.dati, c.giorno into d, g from copie c where c.id = p_copia_id and c.famiglia_id = a.fid;
+  select c.dati, c.giorno into d, g from copie c where c.id = p_copia_id and c.famiglia_id = acc.fid;
   if d is null then
     raise exception 'copia_non_trovata';
   end if;
   insert into copie(famiglia_id, giorno, motivo, dati)
-  values (a.fid, (now() at time zone 'Europe/Rome')::date, 'prima del ripristino', _istantanea(a.fid));
+  values (acc.fid, (now() at time zone 'Europe/Rome')::date, 'prima del ripristino', _istantanea(acc.fid));
 
-  delete from persone where famiglia_id = a.fid;   -- i legami se ne vanno con le persone
+  delete from persone where famiglia_id = acc.fid;   -- i legami se ne vanno con le persone
   insert into persone
-    select x.id, a.fid, x.nome, x.cognome, x.sesso, x.data_nascita, x.luogo_nascita, x.deceduto,
+    select x.id, acc.fid, x.nome, x.cognome, x.sesso, x.data_nascita, x.luogo_nascita, x.deceduto,
            x.data_morte, x.note,
            case when exists (select 1 from foto f where f.id = x.foto_id) then x.miniatura else '' end,
            case when exists (select 1 from foto f where f.id = x.foto_id) then x.foto_id end,
            x.creato_da, x.creato_il, x.aggiornato_da, x.aggiornato_il
     from jsonb_populate_recordset(null::persone, d->'persone') x;
   insert into relazioni
-    select x.id, a.fid, x.tipo, x.da, x.a, x.dettaglio
+    select x.id, acc.fid, x.tipo, x.da, x.a, x.dettaglio
     from jsonb_populate_recordset(null::relazioni, d->'relazioni') x
   on conflict do nothing;
   insert into registro(famiglia_id, chi, azione, descrizione)
-  values (a.fid, _chi(p_chi), 'ripristino_completo',
+  values (acc.fid, _chi(p_chi), 'ripristino_completo',
           'Albero rimesso com''era il ' || to_char(g, 'DD/MM/YYYY'));
 end $$;
 
@@ -569,25 +569,25 @@ end $$;
 
 create or replace function albero_rinomina(p_chiave text, p_nome text) returns void
 language plpgsql security definer set search_path = public, extensions as $$
-declare a record;
+declare acc record;
 begin
-  select * into a from _accesso(p_chiave);
-  if a.ruolo <> 'referente' then
+  select * into acc from _accesso(p_chiave);
+  if acc.ruolo <> 'referente' then
     raise exception 'serve_referente';
   end if;
-  update famiglie set nome = left(trim(p_nome), 80) where id = a.fid;
+  update famiglie set nome = left(trim(p_nome), 80) where id = acc.fid;
 end $$;
 
 -- nuovo link d'invito: quello vecchio smette di funzionare
 create or replace function albero_nuovo_invito(p_chiave text) returns text
 language plpgsql security definer set search_path = public, extensions as $$
-declare a record; k text := _nuova_chiave();
+declare acc record; k text := _nuova_chiave();
 begin
-  select * into a from _accesso(p_chiave);
-  if a.ruolo <> 'referente' then
+  select * into acc from _accesso(p_chiave);
+  if acc.ruolo <> 'referente' then
     raise exception 'serve_referente';
   end if;
-  update famiglie set chiave = k where id = a.fid;
+  update famiglie set chiave = k where id = acc.fid;
   return k;
 end $$;
 

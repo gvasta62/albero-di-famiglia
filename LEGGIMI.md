@@ -31,7 +31,7 @@ Si salvano due versioni: 1000x1000 per la scheda, 180x180 per l'albero. Le foto 
 compaiono in una copia serale o nel registro degli ultimi 90 giorni, poi la copia serale le pulisce.
 
 ## Provarla subito
-Aprire `app/index.html` nel browser: senza collegamento al database parte in **modalità prova**
+Aprire `app/index.html?prova` nel browser (o `index.html` senza collegamento al database): parte in **modalità prova**
 con una famiglia inventata (Rossi). Link di prova: `index.html#g=prova-gestore-00000000001` per il gestore,
 `#k=prova-familiare-rossi-0001` per un familiare. Per ripartire da zero: console del browser, `PROVA.azzera()`.
 
