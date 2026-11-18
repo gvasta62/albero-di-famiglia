@@ -1,0 +1,9 @@
+# mai su git: chiavi e collegamenti, copie con i dati delle famiglie, video e musiche
+segreti/
+copie su OneDrive/
+copia notturna/*.log
+video/
+*.mp4
+*.mp3
+*.wav
+__pycache__/

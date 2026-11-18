@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Albero di famiglia</title>
+<meta name="description" content="L'albero genealogico della famiglia, da completare insieme.">
+<meta name="theme-color" content="#2f6b4f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icona.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icona-180.png">
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="stile.css">
+</head>
+<body>
+<div id="caricamento" class="caricamento" aria-hidden="true"><span></span></div>
+<header class="testata">
+  <div class="testata-titolo">
+    <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 29v-9m0 0-5-4m5 4 5-4M11 16v-3m10 3v-3" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/><circle cx="16" cy="7" r="4" fill="currentColor"/><circle cx="8" cy="11" r="3.2" fill="currentColor"/><circle cx="24" cy="11" r="3.2" fill="currentColor"/></svg>
+    <div>
+      <div id="nome-famiglia" class="nome-famiglia">Albero di famiglia</div>
+      <div id="sottotitolo" class="sottotitolo"></div>
+    </div>
+  </div>
+  <button id="chi-sono" class="chi-sono" type="button" hidden></button>
+</header>
+<div id="avviso-prova" class="avviso-prova" hidden></div>
+<nav id="schede" class="schede" hidden>
+  <button type="button" data-vista="albero"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-6m0 0-4-3m4 3 4-3M8 12V9m8 3V9" /><circle cx="12" cy="5" r="2.5"/><circle cx="6" cy="8" r="2"/><circle cx="18" cy="8" r="2"/></svg><span>Albero</span></button>
+  <button type="button" data-vista="persone"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c1.8.8 3 2.5 3.5 5.2"/></svg><span>Persone</span></button>
+  <button type="button" data-vista="novita"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><span>Novità</span></button>
+  <button type="button" data-vista="altro"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>Altro</span></button>
+</nav>
+<main id="vista" class="vista" tabindex="-1"></main>
+<div id="finestre"></div>
+<div id="avviso" class="avviso" role="status" aria-live="polite"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="config.js"></script>
+<script src="prova.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
