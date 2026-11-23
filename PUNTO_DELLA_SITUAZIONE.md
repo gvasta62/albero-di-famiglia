@@ -82,3 +82,16 @@ Aggiornato: 23/11/2026
 - Video: script in `guida video/` (copione.py testi, voce.py, registra.py, monta.py, istruzioni.py; Rigenera_video.bat fa tutto).
   Il lavoro intermedio sta in %TEMP%lbero_video_lavoro (fuori da OneDrive). La registrazione usa lo screencast
   CDP di Chrome a 780x1688: `record_video` di Playwright riprendeva solo l'angolo a 1x.
+
+## 23/11/2026 (seconda parte)
+- [x] **Segno zodiacale**: nella scheda ("Segno zodiacale: ♓ Pesci") e nella stampa (simbolo piccolo in alto a destra della carta,
+      scelta Sì/No). Solo se della nascita si conoscono giorno e mese. Date di confine: Ariete 21/3-20/4, Toro -20/5, Gemelli -21/6,
+      Cancro -22/7, Leone -23/8, Vergine -22/9, Bilancia -22/10, Scorpione -22/11, Sagittario -21/12, Capricorno -20/1,
+      Acquario -19/2, Pesci -20/3 (`SEGNI` in app.js).
+- Famiglia vera: "Famiglia Vasta", 53 persone. Il link per i familiari si legge dalla pagina del gestore (Copia link familiari).
+  Il link del referente non si può rileggere (nel database c'è solo l'impronta): se perso, "Nuovo link referente".
+- Verificato il doppione segnalato: due schede "Umberto Raponi", una (creata da "Peppe") sposata con Luciana Bartella, l'altra
+  (creata da "Giuseppe Vasta") genitore di Paola e Andrea. Gli altri nomi ripetuti (Angelo, Emilio, Giuseppe, Michele Vasta)
+  sono omonimi veri, con genitori diversi. Correzione lasciata all'utente; manca ancora una funzione per unire due schede.
+- Nuovi alberi: le famiglie le crea solo il gestore (+ Nuova famiglia) e consegna il link del referente. Niente link
+  "crea il tuo albero" a libero accesso, per ora.

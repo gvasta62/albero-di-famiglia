@@ -113,6 +113,18 @@ function dataPerModulo(v) {
   return g ? `${g}/${m}/${a}` : m ? `${m}/${a}` : a;
 }
 const anno = v => (v || '').slice(0, 4);
+/* segno zodiacale: solo se della nascita si conoscono giorno e mese */
+const SEGNI = [
+  [1, 20, 'Capricorno', '♑'], [2, 19, 'Acquario', '♒'], [3, 20, 'Pesci', '♓'], [4, 20, 'Ariete', '♈'],
+  [5, 20, 'Toro', '♉'], [6, 21, 'Gemelli', '♊'], [7, 22, 'Cancro', '♋'], [8, 23, 'Leone', '♌'],
+  [9, 22, 'Vergine', '♍'], [10, 22, 'Bilancia', '♎'], [11, 22, 'Scorpione', '♏'], [12, 21, 'Sagittario', '♐'],
+  [12, 31, 'Capricorno', '♑']];
+function segnoZodiacale(data) {
+  const [, m, g] = (data || '').split('-').map(Number);
+  if (!m || !g) return null;
+  const [, , nome, simbolo] = SEGNI.find(([mm, gg]) => m < mm || (m === mm && g <= gg));
+  return { nome, simbolo: simbolo + '︎' };
+}
 function eta(p) {
   const n = p.data_nascita;
   const f = p.deceduto ? p.data_morte : oggiIso();
@@ -585,6 +597,8 @@ VISTE.scheda = (vista, s) => {
       p.data_nascita ? [(p.data_nascita.length === 10 ? 'il ' : 'nel '), h('strong', null, scriviData(p.data_nascita))] : null,
       p.luogo_nascita ? [' a ', h('strong', null, p.luogo_nascita)] : null));
   }
+  const segno = segnoZodiacale(p.data_nascita);
+  if (segno) righe.push(h('p', null, 'Segno zodiacale: ', h('strong', null, segno.simbolo + ' ' + segno.nome)));
   if (p.deceduto) {
     righe.push(h('p', null, p.data_morte
       ? [morto + ' ' + (p.data_morte.length === 10 ? 'il ' : 'nel '), h('strong', null, scriviData(p.data_morte)), e ? ` a ${e.circa ? 'circa ' : ''}${e.anni} anni` : '']

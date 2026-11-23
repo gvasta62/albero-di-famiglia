@@ -406,6 +406,13 @@ function disegnaVerso(opz, dir) {
     // il luogo si aggiunge solo se ci sta per intero
     const conLuogo = [anniStampa(p), p.luogo_nascita].filter(Boolean).join(' · ');
     const riga3 = taglia(taglia(conLuogo, 11.5, 400, max) === conLuogo ? conLuogo : anniStampa(p) || p.luogo_nascita || '', 11.5, 400, max);
+    // segno zodiacale nell'angolo in alto a destra (se la data di nascita è completa)
+    const segno = opz.segni !== false ? segnoZodiacale(p.data_nascita) : null;
+    if (segno) {
+      g.append(s('text', { x: M.W - 9, y: 17, 'text-anchor': 'end', 'font-size': 12, fill: c.tenue,
+        'font-family': 'Segoe UI Symbol, Apple Symbols, DejaVu Sans, sans-serif' }, s('title', null, segno.nome), segno.simbolo));
+      if (anc === 'start') max -= 14;
+    }
     g.append(s('text', { x: tx, y: riga2 ? 22 : 28, 'text-anchor': anc, 'font-size': 14, 'font-weight': 700, fill: c.testo }, riga1));
     if (riga2) g.append(s('text', { x: tx, y: 39, 'text-anchor': anc, 'font-size': 13, fill: c.testo }, riga2));
     if (riga3) g.append(s('text', { x: tx, y: riga2 ? 56 : 48, 'text-anchor': anc, 'font-size': 11.5, fill: c.tenue }, riga3));
@@ -458,7 +465,7 @@ function scaricaSvg(svg, opz) {
 /* ================================================================ VISTA: STAMPA */
 VISTE.stampa = vista => {
   const CHIAVE = PREFISSO + 'stampa';
-  let opz = { chi: 'tutti', id: null, foglio: 'A3', direzione: 'auto', colori: true, foto: true };
+  let opz = { chi: 'tutti', id: null, foglio: 'A3', direzione: 'auto', colori: true, foto: true, segni: true };
   try { Object.assign(opz, JSON.parse(memoria.leggi(CHIAVE) || '{}')); } catch { /* valori normali */ }
   if (!opz.id || !stato.persone.has(opz.id)) opz.id = stato.centro && stato.persone.has(stato.centro) ? stato.centro : centroIniziale();
   if (!FOGLI[opz.foglio]) opz.foglio = 'A3';
@@ -503,7 +510,8 @@ VISTE.stampa = vista => {
     scelta('direzione', 'Disposizione', [['auto', 'La più leggibile'], ['alto', 'Dall’alto in basso'], ['sinistra', 'Da sinistra a destra']], opz.direzione, v => { opz.direzione = v; aggiorna(); }),
     h('div', { class: 'due-colonne' },
       scelta('colori', 'Colori', [[true, 'A colori'], [false, 'Bianco e nero']], opz.colori, v => { opz.colori = v; aggiorna(); }),
-      scelta('foto', 'Foto', [[true, 'Con le foto'], [false, 'Senza foto']], opz.foto, v => { opz.foto = v; aggiorna(); })));
+      scelta('foto', 'Foto', [[true, 'Con le foto'], [false, 'Senza foto']], opz.foto, v => { opz.foto = v; aggiorna(); })),
+    scelta('segni', 'Segno zodiacale', [[true, 'Sì'], [false, 'No']], opz.segni, v => { opz.segni = v; aggiorna(); }));
 
   vista.append(h('button', { type: 'button', class: 'indietro', onclick: () => history.back() }, '‹ Indietro'),
     h('h1', null, 'Stampa l’albero'),
