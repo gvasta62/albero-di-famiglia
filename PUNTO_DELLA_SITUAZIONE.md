@@ -59,7 +59,16 @@ Aggiornato: 23/11/2026
       PDF A3 e A4 di una pagina, testo vero) e con una famiglia inventata di 90 persone (A1 a 10 punti con disposizione
       da sinistra; dall'alto sarebbe stata a 4 punti). Nessun errore nella pagina, telefono e PC.
       Scelte mie: colori verde/grigio come l'app; luogo di nascita sulla carta solo se ci sta intero.
-- [ ] Video-guida e PDF di istruzioni non parlano ancora della stampa (la guida "Come si usa" nell'app sì, passo 6).
+- [x] (23/11/2026) Edizione **v2** di video e istruzioni, con la stampa (scena/passo 11), affiancata alla prima che resta:
+      `Albero di famiglia - Video guida v2.mp4` (3 min 12 s) e `Albero di famiglia - Istruzioni v2.pdf` (2 pagine; il Consiglio
+      va nella casella libera accanto all'ultimo passo). Il nome dell'edizione è `EDIZIONE` in monta.py e istruzioni.py.
+      Su questo PC la chiave ElevenLabs non c'è: la voce della scena "stampa" è fatta col connettore ElevenLabs (peppe02,
+      eleven_v4) e messa al suo posto con `guida video/voce_da_file.py`, che stima i tempi delle parole dall'audio e
+      scrive la stessa impronta di voce.py (così voce.py la tratta come già pronta). Le altre scene non sono state rifatte.
+      La musica in monta.py si cerca nel OneDrive aziendale su D:, nella home, oppure nel vecchio percorso C:\Users\Peppe.
+- [ ] (23/11/2026) L'utente segnala Umberto Raponi (marito di Luciana Bartella) due volte nella stampa. La stampa disegna
+      ogni scheda una sola volta: quasi certamente nel database ci sono due schede con lo stesso nome. Da verificare con lui
+      (Persone › cerca "Raponi"). L'app non ha ancora un modo per unire due schede doppie.
 
 ## Punti aperti
 - Importazione da una copia OneDrive in caso di perdita totale del progetto Supabase: non c'è ancora

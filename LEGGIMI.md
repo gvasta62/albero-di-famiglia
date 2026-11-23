@@ -11,7 +11,7 @@ luoghi e legami di parentela. Più famiglie convivono separate sullo stesso serv
 | `app/` | GitHub Pages: https://gvasta62.github.io/albero-di-famiglia/ (si ripubblica da sola a ogni push) | l'app vera e propria: HTML, CSS e JavaScript senza compilazione |
 | `database/01_struttura.sql` | Supabase (PostgreSQL gratuito) | tabelle chiuse a internet, funzioni con controllo della chiave, copia serale con pg_cron |
 | `copia notturna/` | il PC del gestore | ogni notte salva tutte le famiglie, foto comprese, in `copie su OneDrive/` |
-| `guida video/` | il PC | video-guida e istruzioni PDF: testi in `copione.py`, tutto si rifà con `Rigenera_video.bat` |
+| `guida video/` | il PC | video-guida e istruzioni PDF: testi in `copione.py`, tutto si rifà con `Rigenera_video.bat`; l'edizione (oggi v2) è in `monta.py` e `istruzioni.py`; senza chiave ElevenLabs una voce fatta altrove si inserisce con `voce_da_file.py` |
 | `segreti/` | solo OneDrive, **mai su git** | chiave del gestore e collegamento al database |
 
 ### Chiavi e ruoli
