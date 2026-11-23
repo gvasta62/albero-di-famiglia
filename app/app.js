@@ -598,6 +598,11 @@ VISTE.scheda = (vista, s) => {
       p.data_nascita ? [(p.data_nascita.length === 10 ? 'il ' : 'nel '), h('strong', null, scriviData(p.data_nascita))] : null,
       p.luogo_nascita ? [' a ', h('strong', null, p.luogo_nascita)] : null));
   }
+  if (!p.deceduto && (p.residenza_citta || p.residenza_indirizzo)) {
+    righe.push(h('p', null, genere(p, 'Vive', 'Vive', 'Vive') + ' ',
+      p.residenza_indirizzo ? ['in ', h('strong', null, p.residenza_indirizzo)] : null,
+      p.residenza_citta ? [p.residenza_indirizzo ? ', ' : 'a ', h('strong', null, p.residenza_citta)] : null));
+  }
   const segno = segnoZodiacale(p.data_nascita);
   if (segno) righe.push(h('p', null, 'Segno zodiacale: ', h('strong', null, segno.simbolo + ' ' + segno.nome)));
   if (p.deceduto) {
@@ -671,7 +676,7 @@ VISTE.modifica = (vista, s) => {
   if (s.id && !p) { vista.append(h('p', null, MESSAGGI.persona_non_trovata)); return; }
   const ctx = s.ctx || null;
   const rif = ctx ? P(ctx.rif) : null;
-  const v = p ? { ...p } : { nome: '', cognome: (ctx && rif && ['figlio', 'fratello'].includes(ctx.tipo)) ? rif.cognome : '', sesso: '', data_nascita: '', luogo_nascita: '', deceduto: false, data_morte: '', note: '', miniatura: '' };
+  const v = p ? { ...p } : { nome: '', cognome: (ctx && rif && ['figlio', 'fratello'].includes(ctx.tipo)) ? rif.cognome : '', sesso: '', data_nascita: '', luogo_nascita: '', deceduto: false, data_morte: '', note: '', miniatura: '', residenza_citta: '', residenza_indirizzo: '' };
   let fotoNuova = null, miniNuova = null;   // null = non toccata, '' = tolta
 
   const campoTesto = (id, etichetta, valore, attrs = {}, aiuto = null) => {
@@ -686,12 +691,20 @@ VISTE.modifica = (vista, s) => {
   const cCognome = campoTesto('f-cognome', 'Cognome', v.cognome, { maxlength: 80, autocomplete: 'off' }, 'Per le donne sposate, di solito il cognome da nubile.');
   const cNascita = campoTesto('f-nascita', 'Data di nascita', dataPerModulo(v.data_nascita), { inputmode: 'text', placeholder: 'es. 12/05/1948 oppure 1948' }, 'Giorno/mese/anno. Se non la sai tutta, basta l’anno.');
   const cLuogo = campoTesto('f-luogo', 'Luogo di nascita', v.luogo_nascita, { maxlength: 120, placeholder: 'es. Perugia' });
+  const cCitta = campoTesto('f-citta', 'Città o paese', v.residenza_citta || '', { maxlength: 120, placeholder: 'es. Perugia' },
+    'Serve anche per la mappa della famiglia.');
+  const cIndirizzo = campoTesto('f-indirizzo', 'Indirizzo', v.residenza_indirizzo || '', { maxlength: 200, autocomplete: 'off', placeholder: 'es. via Roma 12' },
+    'Lo vede solo chi ha il link della famiglia. Lascialo vuoto se la persona preferisce.');
+  const dbVecchio = stato.persone.size && ![...stato.persone.values()].some(x => 'residenza_citta' in x);
+  const boxResidenza = h('div', { class: 'campo', hidden: v.deceduto }, h('span', { class: 'etichetta-campo' }, 'Dove vive oggi'),
+    dbVecchio ? h('div', { class: 'aiuto', style: 'color:var(--attenzione)' }, 'Questi due campi funzioneranno appena chi gestisce l’albero avrà aggiornato il database.') : null,
+    h('div', { class: 'due-colonne' }, cCitta, cIndirizzo));
   const cMorte = campoTesto('f-morte', 'Data di morte', dataPerModulo(v.data_morte), { placeholder: 'es. 3/11/2010 oppure 2010' });
   const sesso = h('div', { class: 'scelta', role: 'radiogroup', 'aria-label': 'Sesso' },
     [['M', 'Uomo'], ['F', 'Donna'], ['', 'Non indicato']].map(([val, t]) => h('label', null, h('input', { type: 'radio', name: 'sesso', value: val, checked: v.sesso === val }), t)));
   const deceduto = h('input', { type: 'checkbox', id: 'f-deceduto', checked: v.deceduto });
   const boxMorte = h('div', { hidden: !v.deceduto }, cMorte);
-  deceduto.addEventListener('change', () => { boxMorte.hidden = !deceduto.checked; });
+  deceduto.addEventListener('change', () => { boxMorte.hidden = !deceduto.checked; boxResidenza.hidden = deceduto.checked; });
   const note = h('textarea', { id: 'f-note', maxlength: 5000, placeholder: 'Mestiere, carattere, ricordi, dove ha vissuto…' }, v.note);
 
   // foto
@@ -724,6 +737,7 @@ VISTE.modifica = (vista, s) => {
       h('div', { class: 'due-colonne' }, cNascita, cLuogo),
       h('label', { class: 'casella' }, deceduto, 'Non è più in vita'),
       boxMorte,
+      boxResidenza,
       h('div', { class: 'campo' }, h('label', { for: 'f-note' }, 'Ricordi e note'), note)),
     h('div', { class: 'barra-salva' },
       h('button', { type: 'button', class: 'pulsante', onclick: () => history.back() }, 'Annulla'), salva));
@@ -744,7 +758,10 @@ VISTE.modifica = (vista, s) => {
       id: p ? p.id : null, nome, cognome: cCognome.input.value.trim(),
       sesso: (modulo.querySelector('input[name=sesso]:checked') || {}).value || '',
       data_nascita: dn, luogo_nascita: cLuogo.input.value.trim(), deceduto: deceduto.checked,
-      data_morte: dm, note: note.value.trim()
+      data_morte: dm, note: note.value.trim(),
+      // chi non c'è più non ha una residenza: i campi si svuotano
+      residenza_citta: deceduto.checked ? '' : cCitta.input.value.trim(),
+      residenza_indirizzo: deceduto.checked ? '' : cIndirizzo.input.value.trim()
     };
     salva.disabled = true;
     try {
@@ -892,7 +909,7 @@ VISTE.copie = async vista => {
       h('span', { class: 'freccia tenue', 'aria-hidden': 'true' }, '›')));
   }
 };
-const CAMPI_CONFRONTO = [['nome', 'nome'], ['cognome', 'cognome'], ['sesso', 'sesso'], ['data_nascita', 'data di nascita'], ['luogo_nascita', 'luogo di nascita'], ['deceduto', 'in vita / defunto'], ['data_morte', 'data di morte'], ['note', 'note'], ['foto_id', 'foto']];
+const CAMPI_CONFRONTO = [['nome', 'nome'], ['cognome', 'cognome'], ['sesso', 'sesso'], ['data_nascita', 'data di nascita'], ['luogo_nascita', 'luogo di nascita'], ['deceduto', 'in vita / defunto'], ['data_morte', 'data di morte'], ['note', 'note'], ['residenza_citta', 'città dove vive'], ['residenza_indirizzo', 'indirizzo'], ['foto_id', 'foto']];
 VISTE.copia = async (vista, s) => {
   vista.append(h('button', { type: 'button', class: 'indietro', onclick: () => history.back() }, '‹ Indietro'),
     h('h1', null, 'Copia di ' + giornoEsteso(s.giorno)),
@@ -942,6 +959,7 @@ VISTE.altro = vista => {
   vista.append(h('h1', { style: 'margin-bottom:14px' }, 'Altro'), h('div', { class: 'menu-altro' },
     voce('✉', 'Invita un familiare', 'Manda il link su WhatsApp, per mail o col codice QR', () => vai({ v: 'invita' })),
     voce('⎙', 'Stampa l’albero', 'Tutto l’albero su un foglio, in PDF o in SVG, a colori', () => vai({ v: 'stampa' })),
+    voce('⌖', 'Mappa della famiglia', 'Dove sono nati e dove vivono, su una cartina da stampare', () => vai({ v: 'mappa' })),
     voce('⟲', 'Copie serali', 'Torna a com’era l’albero una delle sere passate', () => vai({ v: 'copie' })),
     voce('☺', 'Cambia il tuo nome', stato.chi ? 'Ora risulti come: ' + stato.chi : 'Non l’hai ancora indicato', () => chiediNome()),
     stato.ruolo === 'referente' ? voce('✎', 'Nome della famiglia', 'Ora: ' + stato.famiglia.nome, rinominaFamiglia) : null,
@@ -1006,7 +1024,8 @@ VISTE.guida = vista => {
       passo(4, 'Se sbagli', 'Nella scheda Novità c’è tutto quello che è stato fatto, da chi e quando: ogni modifica si può annullare. Per tornare indietro di giorni ci sono le copie serali (Altro › Copie serali).'),
       passo(5, 'Invita gli altri', 'Da Altro › Invita un familiare mandi il link su WhatsApp o mostri il codice QR da inquadrare col telefono.'),
       passo(6, 'Stampa l’albero', 'Da Altro › Stampa l’albero (o dal pulsante Stampa sopra l’albero) scegli se stampare tutta la famiglia o solo un ramo e la grandezza del foglio. Chi è in vita è in verde, chi non c’è più in grigio con la croce. Si può salvare anche in PDF.'),
-      passo(7, 'Sul telefono come un’app', 'Su iPhone: Condividi › Aggiungi alla schermata Home. Su Android: menu ⋮ › Aggiungi a schermata Home.')));
+      passo(7, 'Mappa della famiglia', 'Da Altro › Mappa della famiglia vedi su una cartina dove sono nati tutti, oppure dove vivono oggi, con le frecce da genitore a figlio. Se un paese è scritto male, la pagina te lo segnala.'),
+      passo(8, 'Sul telefono come un’app', 'Su iPhone: Condividi › Aggiungi alla schermata Home. Su Android: menu ⋮ › Aggiungi a schermata Home.')));
 };
 
 /* ================================================================ GESTORE */

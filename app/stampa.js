@@ -449,15 +449,15 @@ function stampaSvg(svg, foglio) {
   // le immagini dentro l'SVG devono essere pronte prima della stampa
   setTimeout(() => { window.print(); setTimeout(() => { if (document.body.contains(foglioEl) && !matchMedia('print').matches) pulisci(); }, 1500); }, 150);
 }
-function nomeFile(opz, est) {
+function nomeFile(opz, est, prefisso = 'Albero') {
   const fam = (stato.famiglia ? stato.famiglia.nome : 'Albero').replace(/[\\/:*?"<>|]+/g, ' ').trim();
   const chi = opz.chi !== 'tutti' && P(opz.id) ? ` - ${opz.chi} di ${nomeCompleto(P(opz.id))}` : '';
-  return `Albero ${fam}${chi}.${est}`.replace(/\s+/g, ' ');
+  return `${prefisso} ${fam}${chi}.${est}`.replace(/\s+/g, ' ');
 }
-function scaricaSvg(svg, opz) {
+function scaricaSvg(svg, opz, prefisso) {
   const testo = '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(svg);
   const url = URL.createObjectURL(new Blob([testo], { type: 'image/svg+xml' }));
-  const a = h('a', { href: url, download: nomeFile(opz, 'svg') });
+  const a = h('a', { href: url, download: nomeFile(opz, 'svg', prefisso) });
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }

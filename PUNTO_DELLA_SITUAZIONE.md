@@ -97,3 +97,16 @@ Aggiornato: 23/11/2026
   "crea il tuo albero" a libero accesso, per ora.
 - [x] Segno zodiacale anche sulle carte della vista Albero (simbolo in alto a destra), su segnalazione dell'utente che non lo
       vedeva lì. Famiglia Vasta al 23/11: 52 persone, solo 16 con data di nascita completa, 2 parziali, 34 senza data.
+- [x] **Residenza** ("Dove vive oggi": città + indirizzo), solo per chi è in vita; nella scheda ("Vive in via ..., città").
+      Database: colonne `residenza_citta` e `residenza_indirizzo` in `persone`, **nullable** (le copie serali vecchie non le hanno),
+      gestite in salvataggio, annulla, rimetti com'era e ripristino completo. **Da far eseguire all'utente**: `database/01_struttura.sql`
+      nello SQL Editor di Supabase. Finché non lo esegue, il modulo mostra l'avviso e i due campi non si salvano.
+- [x] **Mappa della famiglia** (`app/mappa.js`, Altro › Mappa della famiglia): luoghi di nascita o residenze, cerchi grandi
+      secondo il numero di persone (verde in vita / grigio defunti, a spicchio), frecce dal luogo di nascita del genitore a quello
+      del figlio, elenco delle persone per luogo, riquadro "Da vicino" solo se qualcuno sta oltre 2.500 km. SVG: stampa, PDF, file.
+      Cartina: world-atlas 50m (Natural Earth) + d3-geo + topojson da jsdelivr, caricati solo quando si apre la mappa.
+      Luoghi: Nominatim (OpenStreetMap), un nome alla volta (max 1 al secondo), memoria sul dispositivo (`albero-luoghi-v1`).
+      Si accettano solo città/paesi, oppure un risultato col nome identico (Tokyo è "province", Makuhari "railway"): così
+      i nomi scritti male non finiscono in posti a caso ("risei" sarebbe andato in Indonesia, "Pertugia" su una cascina in Piemonte).
+      Sotto la cartina: "Luoghi da correggere" e "Come ho riconosciuto i luoghi" con "Non è questo".
+      Famiglia Vasta: da correggere "risei" (Riesi) e "Pertugia" (Perugia). Modalità prova: memoria `albero-prova-db-v3` con residenze inventate.

@@ -61,6 +61,10 @@ create table if not exists persone (
   aggiornato_il  timestamptz not null default now()
 );
 create index if not exists persone_famiglia on persone(famiglia_id);
+-- dove vive oggi (aggiunte il 23/11/2026): la citta' serve per la mappa, l'indirizzo solo per la scheda.
+-- Possono essere null: le copie serali fatte prima non le hanno.
+alter table persone add column if not exists residenza_citta text default '' check (length(residenza_citta) <= 120);
+alter table persone add column if not exists residenza_indirizzo text default '' check (length(residenza_indirizzo) <= 200);
 
 -- tipo 'genitore': "da" e' genitore di "a".  tipo 'coppia': da e a sono una coppia.
 create table if not exists relazioni (
@@ -253,7 +257,8 @@ begin
 
   if v_id is null then
     insert into persone(famiglia_id, nome, cognome, sesso, data_nascita, luogo_nascita, deceduto,
-                        data_morte, note, miniatura, foto_id, creato_da, aggiornato_da)
+                        data_morte, note, miniatura, foto_id, creato_da, aggiornato_da,
+                        residenza_citta, residenza_indirizzo)
     values (acc.fid,
             trim(p_persona->>'nome'),
             coalesce(trim(p_persona->>'cognome'), ''),
@@ -264,7 +269,9 @@ begin
             coalesce(p_persona->>'data_morte', ''),
             coalesce(p_persona->>'note', ''),
             case when coalesce(p_foto, '') <> '' then coalesce(p_miniatura, '') else '' end,
-            v_foto_id, v_chi, v_chi)
+            v_foto_id, v_chi, v_chi,
+            coalesce(trim(p_persona->>'residenza_citta'), ''),
+            coalesce(trim(p_persona->>'residenza_indirizzo'), ''))
     returning * into v_dopo;
     insert into registro(famiglia_id, chi, azione, descrizione)
     values (acc.fid, v_chi, 'aggiunta_persona', 'Aggiunta ' || _nome_persona(v_dopo));
@@ -285,6 +292,8 @@ begin
     deceduto      = coalesce((p_persona->>'deceduto')::boolean, false),
     data_morte    = coalesce(p_persona->>'data_morte', ''),
     note          = coalesce(p_persona->>'note', ''),
+    residenza_citta     = coalesce(trim(p_persona->>'residenza_citta'), ''),
+    residenza_indirizzo = coalesce(trim(p_persona->>'residenza_indirizzo'), ''),
     miniatura     = case when p_foto is null then miniatura
                          when p_foto = '' then ''
                          else coalesce(p_miniatura, '') end,
@@ -432,6 +441,7 @@ begin
       nome = vp.nome, cognome = vp.cognome, sesso = vp.sesso,
       data_nascita = vp.data_nascita, luogo_nascita = vp.luogo_nascita,
       deceduto = vp.deceduto, data_morte = vp.data_morte, note = vp.note,
+      residenza_citta = coalesce(vp.residenza_citta, ''), residenza_indirizzo = coalesce(vp.residenza_indirizzo, ''),
       miniatura = case when cambiata then vp.miniatura else p.miniatura end,
       foto_id   = case when cambiata then vp.foto_id   else p.foto_id   end,
       aggiornato_da = _chi(p_chi), aggiornato_il = now()
@@ -515,6 +525,7 @@ begin
       nome = vp.nome, cognome = vp.cognome, sesso = vp.sesso,
       data_nascita = vp.data_nascita, luogo_nascita = vp.luogo_nascita,
       deceduto = vp.deceduto, data_morte = vp.data_morte, note = vp.note,
+      residenza_citta = coalesce(vp.residenza_citta, ''), residenza_indirizzo = coalesce(vp.residenza_indirizzo, ''),
       miniatura = vp.miniatura, foto_id = vp.foto_id,
       aggiornato_da = _chi(p_chi), aggiornato_il = now()
     where p.id = vp.id and p.famiglia_id = acc.fid;
@@ -554,7 +565,8 @@ begin
            x.data_morte, x.note,
            case when exists (select 1 from foto f where f.id = x.foto_id) then x.miniatura else '' end,
            case when exists (select 1 from foto f where f.id = x.foto_id) then x.foto_id end,
-           x.creato_da, x.creato_il, x.aggiornato_da, x.aggiornato_il
+           x.creato_da, x.creato_il, x.aggiornato_da, x.aggiornato_il,
+           coalesce(x.residenza_citta, ''), coalesce(x.residenza_indirizzo, '')
     from jsonb_populate_recordset(null::persone, d->'persone') x;
   insert into relazioni
     select x.id, acc.fid, x.tipo, x.da, x.a, x.dettaglio
