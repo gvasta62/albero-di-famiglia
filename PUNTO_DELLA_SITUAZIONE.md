@@ -95,3 +95,5 @@ Aggiornato: 23/11/2026
   sono omonimi veri, con genitori diversi. Correzione lasciata all'utente; manca ancora una funzione per unire due schede.
 - Nuovi alberi: le famiglie le crea solo il gestore (+ Nuova famiglia) e consegna il link del referente. Niente link
   "crea il tuo albero" a libero accesso, per ora.
+- [x] Segno zodiacale anche sulle carte della vista Albero (simbolo in alto a destra), su segnalazione dell'utente che non lo
+      vedeva lì. Famiglia Vasta al 23/11: 52 persone, solo 16 con data di nascita completa, 2 parziali, 34 senza data.

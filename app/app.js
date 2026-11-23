@@ -310,7 +310,8 @@ function cartaPersona(p, { centro = false, ruolo = null } = {}) {
   volto(p, centro ? 96 : 64),
   h('span', { class: 'nome' }, p.nome),
   p.cognome ? h('span', { class: 'cognome' }, p.cognome) : null,
-  h('span', { class: 'anni' }, anniBreve(p)));
+  h('span', { class: 'anni' }, anniBreve(p)),
+  segnoZodiacale(p.data_nascita) ? h('span', { class: 'segno', title: segnoZodiacale(p.data_nascita).nome }, segnoZodiacale(p.data_nascita).simbolo) : null);
 }
 function cartaMancante(testo, azione) {
   return h('button', { type: 'button', class: 'carta-persona mancante', onclick: azione },
