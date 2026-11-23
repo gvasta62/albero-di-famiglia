@@ -99,8 +99,8 @@ Aggiornato: 23/11/2026
       vedeva lì. Famiglia Vasta al 23/11: 52 persone, solo 16 con data di nascita completa, 2 parziali, 34 senza data.
 - [x] **Residenza** ("Dove vive oggi": città + indirizzo), solo per chi è in vita; nella scheda ("Vive in via ..., città").
       Database: colonne `residenza_citta` e `residenza_indirizzo` in `persone`, **nullable** (le copie serali vecchie non le hanno),
-      gestite in salvataggio, annulla, rimetti com'era e ripristino completo. **Da far eseguire all'utente**: `database/01_struttura.sql`
-      nello SQL Editor di Supabase. Finché non lo esegue, il modulo mostra l'avviso e i due campi non si salvano.
+      gestite in salvataggio, annulla, rimetti com'era e ripristino completo. `database/01_struttura.sql` **eseguito dall'utente**
+      nello SQL Editor il 23/11/2026: verificato, tutte le 52 persone della Famiglia Vasta hanno i due campi (ancora vuoti).
 - [x] **Mappa della famiglia** (`app/mappa.js`, Altro › Mappa della famiglia): luoghi di nascita o residenze, cerchi grandi
       secondo il numero di persone (verde in vita / grigio defunti, a spicchio), frecce dal luogo di nascita del genitore a quello
       del figlio, elenco delle persone per luogo, riquadro "Da vicino" solo se qualcuno sta oltre 2.500 km. SVG: stampa, PDF, file.
