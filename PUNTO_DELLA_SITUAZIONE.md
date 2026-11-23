@@ -101,6 +101,12 @@ Aggiornato: 23/11/2026
       Database: colonne `residenza_citta` e `residenza_indirizzo` in `persone`, **nullable** (le copie serali vecchie non le hanno),
       gestite in salvataggio, annulla, rimetti com'era e ripristino completo. `database/01_struttura.sql` **eseguito dall'utente**
       nello SQL Editor il 23/11/2026: verificato, tutte le 52 persone della Famiglia Vasta hanno i due campi (ancora vuoti).
+- [x] **Indirizzo in parti** (richiesta dell'utente, 23/11/2026): via o piazza, N. civico, CAP, città, provincia (all'estero lo Stato).
+      `residenza_indirizzo` resta la via; nuove colonne `residenza_civico` (20), `residenza_cap` (10), `residenza_provincia` (60),
+      nullable come le altre. Scheda: "Vive in via Zamboni 33, 40126 Bologna (BO)". Sul telefono: via+civico affiancati, città da sola,
+      CAP+provincia affiancati. Modalità prova: memoria `albero-prova-db-v4`. L'avviso nel modulo ora guarda `residenza_cap`.
+      **Da far eseguire all'utente**: di nuovo `database/01_struttura.sql` nello SQL Editor; finché non lo fa civico, CAP e
+      provincia non si salvano (via e città sì).
 - [x] **Mappa della famiglia** (`app/mappa.js`, Altro › Mappa della famiglia): luoghi di nascita o residenze, cerchi grandi
       secondo il numero di persone (verde in vita / grigio defunti, a spicchio), frecce dal luogo di nascita del genitore a quello
       del figlio, elenco delle persone per luogo, riquadro "Da vicino" solo se qualcuno sta oltre 2.500 km. SVG: stampa, PDF, file.

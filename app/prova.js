@@ -11,7 +11,7 @@
     gestore: 'prova-gestore-00000000001',
     esposito: 'prova-familiare-esposito-01'
   };
-  const MEM = 'albero-prova-db-v3';   // v3: con la residenza
+  const MEM = 'albero-prova-db-v4';   // v4: residenza con civico, CAP e provincia
   const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
     const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16);
   }));
@@ -31,7 +31,7 @@
     const P = {};
     const persona = (k, fid, nome, cognome, sesso, nascita, luogo, morte, note, chi, quando) => {
       const p = { id: uuid(), famiglia_id: fid, nome, cognome, sesso, data_nascita: nascita, luogo_nascita: luogo,
-        deceduto: morte !== null, data_morte: morte || '', note: note || '', miniatura: '', foto_id: null, residenza_citta: '', residenza_indirizzo: '',
+        deceduto: morte !== null, data_morte: morte || '', note: note || '', miniatura: '', foto_id: null, residenza_citta: '', residenza_indirizzo: '', residenza_civico: '', residenza_cap: '', residenza_provincia: '',
         creato_da: chi, creato_il: quando, aggiornato_da: chi, aggiornato_il: quando };
       db.persone.push(p); P[k] = p; return p;
     };
@@ -53,10 +53,13 @@
     persona('gennaro', fE.id, 'Gennaro', 'Esposito', 'M', '1940', 'Napoli', null, '', 'Gestore', t);
     persona('rosa', fE.id, 'Rosa', 'Esposito', 'F', '1968', 'Napoli', null, '', 'Gestore', t);
     // dove vivono oggi (inventato), per la scheda e per la mappa
-    const vive = { antonio: ['Perugia', 'via dei Priori 14'], carla: ['Perugia', 'via dei Priori 14'], lucia: ['Milano', ''], paolo: ['Milano', ''],
-      marco: ['Perugia', 'via Settevalli 120'], sara: ['Perugia', 'via Settevalli 120'], elena: ['Roma', ''], luca: ['Bologna', ''],
-      giulia: ['Perugia', ''], chiara: ['Londra', ''], rosa: ['Napoli', ''] };
-    for (const [k, [c, i]] of Object.entries(vive)) { P[k].residenza_citta = c; P[k].residenza_indirizzo = i; }
+    const vive = { antonio: ['Perugia', 'via dei Priori', '14', '06123', 'PG'], carla: ['Perugia', 'via dei Priori', '14', '06123', 'PG'],
+      lucia: ['Milano', '', '', '', 'MI'], paolo: ['Milano', '', '', '', 'MI'],
+      marco: ['Perugia', 'via Settevalli', '120', '06129', 'PG'], sara: ['Perugia', 'via Settevalli', '120', '06129', 'PG'],
+      elena: ['Roma', '', '', '', 'RM'], luca: ['Bologna', '', '', '', 'BO'], giulia: ['Perugia', '', '', '', 'PG'],
+      chiara: ['Londra', '', '', '', 'Regno Unito'], rosa: ['Napoli', '', '', '', 'NA'] };
+    for (const [k, [c, i, n, cap, pr]] of Object.entries(vive))
+      Object.assign(P[k], { residenza_citta: c, residenza_indirizzo: i, residenza_civico: n, residenza_cap: cap, residenza_provincia: pr });
     const gen = (a, b) => db.relazioni.push({ id: uuid(), famiglia_id: P[a].famiglia_id, tipo: 'genitore', da: P[a].id, a: P[b].id, dettaglio: '' });
     const cop = (a, b, d) => { const [x, y] = [P[a].id, P[b].id].sort(); db.relazioni.push({ id: uuid(), famiglia_id: P[a].famiglia_id, tipo: 'coppia', da: x, a: y, dettaglio: d }); };
     cop('giovanni', 'maria', 'sposati'); cop('pietro', 'anna', 'sposati'); cop('antonio', 'carla', 'sposati');
@@ -132,7 +135,7 @@
       if (!(v.nome || '').trim()) errore('nome_mancante');
       let fotoId = null;
       if (a.p_foto) { fotoId = uuid(); db.foto[fotoId] = { famiglia_id: x.fid, dati: a.p_foto }; }
-      const campi = { nome: v.nome.trim(), cognome: (v.cognome || '').trim(), sesso: v.sesso || '', data_nascita: v.data_nascita || '', luogo_nascita: (v.luogo_nascita || '').trim(), deceduto: !!v.deceduto, data_morte: v.data_morte || '', note: v.note || '', residenza_citta: (v.residenza_citta || '').trim(), residenza_indirizzo: (v.residenza_indirizzo || '').trim() };
+      const campi = { nome: v.nome.trim(), cognome: (v.cognome || '').trim(), sesso: v.sesso || '', data_nascita: v.data_nascita || '', luogo_nascita: (v.luogo_nascita || '').trim(), deceduto: !!v.deceduto, data_morte: v.data_morte || '', note: v.note || '', residenza_citta: (v.residenza_citta || '').trim(), residenza_indirizzo: (v.residenza_indirizzo || '').trim(), residenza_civico: (v.residenza_civico || '').trim(), residenza_cap: (v.residenza_cap || '').trim(), residenza_provincia: (v.residenza_provincia || '').trim() };
       if (!v.id) {
         const p = { id: uuid(), famiglia_id: x.fid, ...campi, miniatura: a.p_foto ? (a.p_miniatura || '') : '', foto_id: fotoId, creato_da: a.p_chi, creato_il: ora(), aggiornato_da: a.p_chi, aggiornato_il: ora() };
         db.persone.push(p); registra(x.fid, a.p_chi, 'aggiunta_persona', 'Aggiunta ' + nomeP(p)); return p.id;
@@ -190,7 +193,7 @@
       } else if (v.azione === 'modifica_persona') {
         const vp = fotoOk(clona(v.prima.persona));
         const p = db.persone.find(y => y.id === vp.id && y.famiglia_id === x.fid) || errore('persona_non_trovata');
-        for (const k of ['nome', 'cognome', 'sesso', 'data_nascita', 'luogo_nascita', 'deceduto', 'data_morte', 'note', 'residenza_citta', 'residenza_indirizzo']) p[k] = vp[k] ?? (k.startsWith('residenza') ? '' : vp[k]);
+        for (const k of ['nome', 'cognome', 'sesso', 'data_nascita', 'luogo_nascita', 'deceduto', 'data_morte', 'note', 'residenza_citta', 'residenza_indirizzo', 'residenza_civico', 'residenza_cap', 'residenza_provincia']) p[k] = vp[k] ?? (k.startsWith('residenza') ? '' : vp[k]);
         if (v.prima.foto_cambiata) { p.miniatura = vp.miniatura; p.foto_id = vp.foto_id; }
         p.aggiornato_da = a.p_chi; p.aggiornato_il = ora();
       } else if (v.azione === 'elimina_relazione') {

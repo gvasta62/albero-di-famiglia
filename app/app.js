@@ -598,10 +598,12 @@ VISTE.scheda = (vista, s) => {
       p.data_nascita ? [(p.data_nascita.length === 10 ? 'il ' : 'nel '), h('strong', null, scriviData(p.data_nascita))] : null,
       p.luogo_nascita ? [' a ', h('strong', null, p.luogo_nascita)] : null));
   }
-  if (!p.deceduto && (p.residenza_citta || p.residenza_indirizzo)) {
-    righe.push(h('p', null, genere(p, 'Vive', 'Vive', 'Vive') + ' ',
-      p.residenza_indirizzo ? ['in ', h('strong', null, p.residenza_indirizzo)] : null,
-      p.residenza_citta ? [p.residenza_indirizzo ? ', ' : 'a ', h('strong', null, p.residenza_citta)] : null));
+  const strada = [p.residenza_indirizzo, p.residenza_civico].filter(Boolean).join(' ');
+  const luogoVita = [p.residenza_cap, p.residenza_citta].filter(Boolean).join(' ') + (p.residenza_provincia ? ` (${p.residenza_provincia})` : '');
+  if (!p.deceduto && (strada || luogoVita.trim())) {
+    righe.push(h('p', null, 'Vive ',
+      strada ? ['in ', h('strong', null, strada)] : null,
+      luogoVita.trim() ? [strada ? ', ' : 'a ', h('strong', null, luogoVita.trim())] : null));
   }
   const segno = segnoZodiacale(p.data_nascita);
   if (segno) righe.push(h('p', null, 'Segno zodiacale: ', h('strong', null, segno.simbolo + ' ' + segno.nome)));
@@ -676,7 +678,7 @@ VISTE.modifica = (vista, s) => {
   if (s.id && !p) { vista.append(h('p', null, MESSAGGI.persona_non_trovata)); return; }
   const ctx = s.ctx || null;
   const rif = ctx ? P(ctx.rif) : null;
-  const v = p ? { ...p } : { nome: '', cognome: (ctx && rif && ['figlio', 'fratello'].includes(ctx.tipo)) ? rif.cognome : '', sesso: '', data_nascita: '', luogo_nascita: '', deceduto: false, data_morte: '', note: '', miniatura: '', residenza_citta: '', residenza_indirizzo: '' };
+  const v = p ? { ...p } : { nome: '', cognome: (ctx && rif && ['figlio', 'fratello'].includes(ctx.tipo)) ? rif.cognome : '', sesso: '', data_nascita: '', luogo_nascita: '', deceduto: false, data_morte: '', note: '', miniatura: '', residenza_citta: '', residenza_indirizzo: '', residenza_civico: '', residenza_cap: '', residenza_provincia: '' };
   let fotoNuova = null, miniNuova = null;   // null = non toccata, '' = tolta
 
   const campoTesto = (id, etichetta, valore, attrs = {}, aiuto = null) => {
@@ -691,14 +693,20 @@ VISTE.modifica = (vista, s) => {
   const cCognome = campoTesto('f-cognome', 'Cognome', v.cognome, { maxlength: 80, autocomplete: 'off' }, 'Per le donne sposate, di solito il cognome da nubile.');
   const cNascita = campoTesto('f-nascita', 'Data di nascita', dataPerModulo(v.data_nascita), { inputmode: 'text', placeholder: 'es. 12/05/1948 oppure 1948' }, 'Giorno/mese/anno. Se non la sai tutta, basta l’anno.');
   const cLuogo = campoTesto('f-luogo', 'Luogo di nascita', v.luogo_nascita, { maxlength: 120, placeholder: 'es. Perugia' });
-  const cCitta = campoTesto('f-citta', 'Città o paese', v.residenza_citta || '', { maxlength: 120, placeholder: 'es. Perugia' },
-    'Serve anche per la mappa della famiglia.');
-  const cIndirizzo = campoTesto('f-indirizzo', 'Indirizzo', v.residenza_indirizzo || '', { maxlength: 200, autocomplete: 'off', placeholder: 'es. via Roma 12' },
-    'Lo vede solo chi ha il link della famiglia. Lascialo vuoto se la persona preferisce.');
-  const dbVecchio = stato.persone.size && ![...stato.persone.values()].some(x => 'residenza_citta' in x);
+  const cIndirizzo = campoTesto('f-indirizzo', 'Via o piazza', v.residenza_indirizzo || '', { maxlength: 200, autocomplete: 'off', placeholder: 'es. via Roma' });
+  const cCivico = campoTesto('f-civico', 'N. civico', v.residenza_civico || '', { maxlength: 20, autocomplete: 'off', placeholder: 'es. 12/B' });
+  const cCap = campoTesto('f-cap', 'CAP', v.residenza_cap || '', { maxlength: 10, autocomplete: 'off', inputmode: 'numeric', placeholder: 'es. 06121' });
+  const cCitta = campoTesto('f-citta', 'Città o paese', v.residenza_citta || '', { maxlength: 120, placeholder: 'es. Perugia' });
+  const cProvincia = campoTesto('f-provincia', 'Provincia', v.residenza_provincia || '', { maxlength: 60, placeholder: 'es. PG' });
+  // il database va aggiornato due volte: prima città e indirizzo, poi civico, CAP e provincia
+  const tutti = [...stato.persone.values()];
+  const dbVecchio = stato.persone.size && !tutti.some(x => 'residenza_cap' in x);
   const boxResidenza = h('div', { class: 'campo', hidden: v.deceduto }, h('span', { class: 'etichetta-campo' }, 'Dove vive oggi'),
-    dbVecchio ? h('div', { class: 'aiuto', style: 'color:var(--attenzione)' }, 'Questi due campi funzioneranno appena chi gestisce l’albero avrà aggiornato il database.') : null,
-    h('div', { class: 'due-colonne' }, cCitta, cIndirizzo));
+    h('div', { class: 'aiuto' }, 'La città serve anche per la mappa della famiglia. L’indirizzo lo vede solo chi ha il link della famiglia: lascialo vuoto se la persona preferisce. Se vive all’estero, al posto della provincia scrivi lo Stato.'),
+    dbVecchio ? h('div', { class: 'aiuto', style: 'color:var(--attenzione)' }, 'Alcuni di questi campi funzioneranno appena chi gestisce l’albero avrà aggiornato il database.') : null,
+    h('div', { class: 'righe-indirizzo' },
+      h('div', { class: 'riga-via' }, cIndirizzo, cCivico),
+      h('div', { class: 'riga-citta' }, cCap, cCitta, cProvincia)));
   const cMorte = campoTesto('f-morte', 'Data di morte', dataPerModulo(v.data_morte), { placeholder: 'es. 3/11/2010 oppure 2010' });
   const sesso = h('div', { class: 'scelta', role: 'radiogroup', 'aria-label': 'Sesso' },
     [['M', 'Uomo'], ['F', 'Donna'], ['', 'Non indicato']].map(([val, t]) => h('label', null, h('input', { type: 'radio', name: 'sesso', value: val, checked: v.sesso === val }), t)));
@@ -761,7 +769,10 @@ VISTE.modifica = (vista, s) => {
       data_morte: dm, note: note.value.trim(),
       // chi non c'è più non ha una residenza: i campi si svuotano
       residenza_citta: deceduto.checked ? '' : cCitta.input.value.trim(),
-      residenza_indirizzo: deceduto.checked ? '' : cIndirizzo.input.value.trim()
+      residenza_indirizzo: deceduto.checked ? '' : cIndirizzo.input.value.trim(),
+      residenza_civico: deceduto.checked ? '' : cCivico.input.value.trim(),
+      residenza_cap: deceduto.checked ? '' : cCap.input.value.trim(),
+      residenza_provincia: deceduto.checked ? '' : cProvincia.input.value.trim()
     };
     salva.disabled = true;
     try {
@@ -909,7 +920,7 @@ VISTE.copie = async vista => {
       h('span', { class: 'freccia tenue', 'aria-hidden': 'true' }, '›')));
   }
 };
-const CAMPI_CONFRONTO = [['nome', 'nome'], ['cognome', 'cognome'], ['sesso', 'sesso'], ['data_nascita', 'data di nascita'], ['luogo_nascita', 'luogo di nascita'], ['deceduto', 'in vita / defunto'], ['data_morte', 'data di morte'], ['note', 'note'], ['residenza_citta', 'città dove vive'], ['residenza_indirizzo', 'indirizzo'], ['foto_id', 'foto']];
+const CAMPI_CONFRONTO = [['nome', 'nome'], ['cognome', 'cognome'], ['sesso', 'sesso'], ['data_nascita', 'data di nascita'], ['luogo_nascita', 'luogo di nascita'], ['deceduto', 'in vita / defunto'], ['data_morte', 'data di morte'], ['note', 'note'], ['residenza_citta', 'città dove vive'], ['residenza_indirizzo', 'via'], ['residenza_civico', 'numero civico'], ['residenza_cap', 'CAP'], ['residenza_provincia', 'provincia'], ['foto_id', 'foto']];
 VISTE.copia = async (vista, s) => {
   vista.append(h('button', { type: 'button', class: 'indietro', onclick: () => history.back() }, '‹ Indietro'),
     h('h1', null, 'Copia di ' + giornoEsteso(s.giorno)),

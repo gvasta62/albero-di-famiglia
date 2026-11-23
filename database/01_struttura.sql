@@ -65,6 +65,10 @@ create index if not exists persone_famiglia on persone(famiglia_id);
 -- Possono essere null: le copie serali fatte prima non le hanno.
 alter table persone add column if not exists residenza_citta text default '' check (length(residenza_citta) <= 120);
 alter table persone add column if not exists residenza_indirizzo text default '' check (length(residenza_indirizzo) <= 200);
+-- l'indirizzo in parti (aggiunte il 23/11/2026, dopo): residenza_indirizzo resta la via
+alter table persone add column if not exists residenza_civico text default '' check (length(residenza_civico) <= 20);
+alter table persone add column if not exists residenza_cap text default '' check (length(residenza_cap) <= 10);
+alter table persone add column if not exists residenza_provincia text default '' check (length(residenza_provincia) <= 60);
 
 -- tipo 'genitore': "da" e' genitore di "a".  tipo 'coppia': da e a sono una coppia.
 create table if not exists relazioni (
@@ -258,7 +262,7 @@ begin
   if v_id is null then
     insert into persone(famiglia_id, nome, cognome, sesso, data_nascita, luogo_nascita, deceduto,
                         data_morte, note, miniatura, foto_id, creato_da, aggiornato_da,
-                        residenza_citta, residenza_indirizzo)
+                        residenza_citta, residenza_indirizzo, residenza_civico, residenza_cap, residenza_provincia)
     values (acc.fid,
             trim(p_persona->>'nome'),
             coalesce(trim(p_persona->>'cognome'), ''),
@@ -271,7 +275,10 @@ begin
             case when coalesce(p_foto, '') <> '' then coalesce(p_miniatura, '') else '' end,
             v_foto_id, v_chi, v_chi,
             coalesce(trim(p_persona->>'residenza_citta'), ''),
-            coalesce(trim(p_persona->>'residenza_indirizzo'), ''))
+            coalesce(trim(p_persona->>'residenza_indirizzo'), ''),
+            coalesce(trim(p_persona->>'residenza_civico'), ''),
+            coalesce(trim(p_persona->>'residenza_cap'), ''),
+            coalesce(trim(p_persona->>'residenza_provincia'), ''))
     returning * into v_dopo;
     insert into registro(famiglia_id, chi, azione, descrizione)
     values (acc.fid, v_chi, 'aggiunta_persona', 'Aggiunta ' || _nome_persona(v_dopo));
@@ -294,6 +301,9 @@ begin
     note          = coalesce(p_persona->>'note', ''),
     residenza_citta     = coalesce(trim(p_persona->>'residenza_citta'), ''),
     residenza_indirizzo = coalesce(trim(p_persona->>'residenza_indirizzo'), ''),
+    residenza_civico    = coalesce(trim(p_persona->>'residenza_civico'), ''),
+    residenza_cap       = coalesce(trim(p_persona->>'residenza_cap'), ''),
+    residenza_provincia = coalesce(trim(p_persona->>'residenza_provincia'), ''),
     miniatura     = case when p_foto is null then miniatura
                          when p_foto = '' then ''
                          else coalesce(p_miniatura, '') end,
@@ -442,6 +452,7 @@ begin
       data_nascita = vp.data_nascita, luogo_nascita = vp.luogo_nascita,
       deceduto = vp.deceduto, data_morte = vp.data_morte, note = vp.note,
       residenza_citta = coalesce(vp.residenza_citta, ''), residenza_indirizzo = coalesce(vp.residenza_indirizzo, ''),
+      residenza_civico = coalesce(vp.residenza_civico, ''), residenza_cap = coalesce(vp.residenza_cap, ''), residenza_provincia = coalesce(vp.residenza_provincia, ''),
       miniatura = case when cambiata then vp.miniatura else p.miniatura end,
       foto_id   = case when cambiata then vp.foto_id   else p.foto_id   end,
       aggiornato_da = _chi(p_chi), aggiornato_il = now()
@@ -526,6 +537,7 @@ begin
       data_nascita = vp.data_nascita, luogo_nascita = vp.luogo_nascita,
       deceduto = vp.deceduto, data_morte = vp.data_morte, note = vp.note,
       residenza_citta = coalesce(vp.residenza_citta, ''), residenza_indirizzo = coalesce(vp.residenza_indirizzo, ''),
+      residenza_civico = coalesce(vp.residenza_civico, ''), residenza_cap = coalesce(vp.residenza_cap, ''), residenza_provincia = coalesce(vp.residenza_provincia, ''),
       miniatura = vp.miniatura, foto_id = vp.foto_id,
       aggiornato_da = _chi(p_chi), aggiornato_il = now()
     where p.id = vp.id and p.famiglia_id = acc.fid;
@@ -566,7 +578,8 @@ begin
            case when exists (select 1 from foto f where f.id = x.foto_id) then x.miniatura else '' end,
            case when exists (select 1 from foto f where f.id = x.foto_id) then x.foto_id end,
            x.creato_da, x.creato_il, x.aggiornato_da, x.aggiornato_il,
-           coalesce(x.residenza_citta, ''), coalesce(x.residenza_indirizzo, '')
+           coalesce(x.residenza_citta, ''), coalesce(x.residenza_indirizzo, ''),
+           coalesce(x.residenza_civico, ''), coalesce(x.residenza_cap, ''), coalesce(x.residenza_provincia, '')
     from jsonb_populate_recordset(null::persone, d->'persone') x;
   insert into relazioni
     select x.id, acc.fid, x.tipo, x.da, x.a, x.dettaglio

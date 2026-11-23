@@ -42,6 +42,15 @@ scelto i nomi verrebbero sotto i 7 punti.
 Disposizione: generazioni calcolate dai legami, coniugi affiancati, ordine con baricentri e posizioni con regressione
 isotona (niente sovrapposizioni); le linee orizzontali di gruppi diversi vanno su corsie diverse.
 
+### Mappa della famiglia e residenza
+Altro › **Mappa della famiglia**, codice in `app/mappa.js`: cartina vettoriale (SVG) con i luoghi di nascita oppure le
+città dove vivono oggi, cerchi grandi secondo il numero di persone, frecce dal luogo di nascita dei genitori a quello dei
+figli. I luoghi si cercano su OpenStreetMap (Nominatim), un nome alla volta: si manda solo il nome del luogo, mai quello
+delle persone. Si stampa, si salva in PDF o in `.svg` come l'albero.
+Nella scheda di chi è in vita, "Dove vive oggi": via o piazza, numero civico, CAP, città, provincia (all'estero lo Stato).
+Colonne `residenza_citta`, `residenza_indirizzo` (la via), `residenza_civico`, `residenza_cap`, `residenza_provincia`;
+per la mappa conta solo la città.
+
 ## Provarla subito
 Aprire `app/index.html?prova` nel browser (o `index.html` senza collegamento al database): parte in **modalità prova**
 con una famiglia inventata (Rossi). Link di prova: `index.html#g=prova-gestore-00000000001` per il gestore,

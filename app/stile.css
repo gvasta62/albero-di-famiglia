@@ -206,6 +206,19 @@ a { color: var(--accento-scuro); }
 .campo .messaggio-errore { color: var(--pericolo); font-size: .88rem; font-weight: 600; }
 .due-colonne { display: grid; gap: 16px; }
 @media (min-width: 640px) { .due-colonne { grid-template-columns: 1fr 1fr; } }
+/* indirizzo: via + civico, poi CAP + città + provincia */
+.righe-indirizzo { display: grid; gap: 12px; }
+.riga-via, .riga-citta { display: grid; gap: 12px; }
+.riga-via { grid-template-columns: 2.2fr 1fr; }
+/* sul telefono: la città da sola, sotto CAP e provincia affiancati */
+.riga-citta { grid-template-columns: 1fr 1fr; grid-template-areas: "citta citta" "cap prov"; }
+.riga-citta > :nth-child(1) { grid-area: cap; }
+.riga-citta > :nth-child(2) { grid-area: citta; }
+.riga-citta > :nth-child(3) { grid-area: prov; }
+@media (min-width: 640px) {
+  .riga-via { grid-template-columns: 3fr 1fr; }
+  .riga-citta { grid-template-columns: 1fr 2.5fr 1.2fr; grid-template-areas: "cap citta prov"; }
+}
 .scelta { display: flex; flex-wrap: wrap; gap: 8px; }
 .scelta label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 14px; border: 1px solid var(--linea-forte); border-radius: 12px; background: var(--carta); font-weight: 500; }
 .scelta label:has(input:checked) { border-color: var(--accento); background: var(--accento-tenue); font-weight: 650; }
