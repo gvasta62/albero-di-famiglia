@@ -15,7 +15,8 @@ from PIL import Image, ImageDraw, ImageFont
 QUI = Path(__file__).resolve().parent
 LAVORO = Path(tempfile.gettempdir()) / "albero_video_lavoro"
 FF = imageio_ffmpeg.get_ffmpeg_exe()
-USCITA = QUI.parent / "Albero di famiglia - Istruzioni.pdf"
+EDIZIONE = "v2"   # v2 (23/11/2026): aggiunta la stampa dell'albero; la prima edizione resta accanto
+USCITA = QUI.parent / f"Albero di famiglia - Istruzioni {EDIZIONE}.pdf"
 
 DPI = 150
 PW, PH = 1240, 1754                     # A4 a 150 dpi
@@ -50,6 +51,9 @@ PASSI = [
      "Ogni sera l'albero si salva da solo (per un mese). Da Altro › Copie serali recuperi una persona com'era."),
     ("invita", 0.55, "Invita gli altri",
      "Da Altro › Invita un familiare mandi il link su WhatsApp o mostri il codice QR. Mandalo solo ai familiari."),
+    ("stampa", 0.62, "Stampa l'albero",
+     "Da Altro › Stampa l'albero scegli tutta la famiglia o un ramo e il foglio. In vita in verde, defunti in grigio "
+     "con la croce. Si salva anche in PDF."),
 ]
 
 
@@ -128,14 +132,19 @@ def main():
                 d.text((tx, yy), r, font=f, fill=INCH)
                 yy += 34
         if np_ == len(blocchi) - 1:
-            y = 205 + ((len(blocco) + 1) // colonne) * cella_h + 10
-            d.rounded_rectangle([M, y, PW - M, y + 190], radius=22, fill=(226, 238, 230))
-            d.text((M + 36, y + 30), "Consiglio", font=font("palab.ttf", 34), fill=(35, 79, 59))
+            consiglio = ("Dal telefono aggiungi il sito alla schermata Home: su iPhone Condividi › Aggiungi alla "
+                         "schermata Home; su Android menu (i tre puntini) › Aggiungi a schermata Home. Così si apre come un'app.")
             f = font("segoeui.ttf", 26)
-            yy = y + 82
-            for r in a_capo(d, "Dal telefono aggiungi il sito alla schermata Home: su iPhone Condividi › Aggiungi alla "
-                               "schermata Home; su Android menu (i tre puntini) › Aggiungi a schermata Home. Così si apre come un'app.", f, PW - 2 * M - 72):
-                d.text((M + 36, yy), r, font=f, fill=INCH)
+            if len(blocco) % 2:      # casella libera accanto all'ultimo passo
+                x0, y0, larg = M + cella_w + 40, 205 + (len(blocco) // colonne) * cella_h, cella_w
+            else:                    # sotto, a tutta larghezza
+                x0, y0, larg = M, 205 + (len(blocco) // colonne) * cella_h + 10, PW - 2 * M
+            righe = a_capo(d, consiglio, f, larg - 72)
+            d.rounded_rectangle([x0, y0, x0 + larg, y0 + 110 + len(righe) * 34], radius=22, fill=(226, 238, 230))
+            d.text((x0 + 36, y0 + 30), "Consiglio", font=font("palab.ttf", 34), fill=(35, 79, 59))
+            yy = y0 + 82
+            for r in righe:
+                d.text((x0 + 36, yy), r, font=f, fill=INCH)
                 yy += 34
         pagine.append(pg)
     pagine[0].save(USCITA, save_all=True, append_images=pagine[1:], resolution=DPI)

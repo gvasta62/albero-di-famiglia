@@ -55,6 +55,10 @@ SCENE = [
      "Per far entrare un altro parente, vai su Altro, Invita un familiare. Puoi mandare il link su "
      "WhatsApp o per mail, oppure fargli inquadrare il codice QR. Chi ha il link può aggiungere e "
      "correggere: mandalo solo ai familiari."),
+    ("stampa", "Stampare l'albero",
+     "Vuoi l'albero su carta? Vai su Altro, Stampa l'albero. Scegli se stampare tutta la famiglia o solo un ramo, "
+     "e la grandezza del foglio. Chi è in vita è in verde, chi non c'è più è in grigio, con la croce. "
+     "Poi tocca Stampa o salva in PDF: il disegno resta nitido anche su un foglio grande."),
     ("fine", "Buon divertimento!",
      "Ultimo consiglio: dal telefono, aggiungi il sito alla schermata Home, così lo apri come un'app. "
      "E adesso tocca a te: aggiungi le persone che conosci e chiedi ai parenti di completare il resto. "

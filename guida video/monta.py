@@ -23,8 +23,14 @@ import copione as C
 QUI = Path(__file__).resolve().parent
 LAVORO = Path(tempfile.gettempdir()) / "albero_video_lavoro"
 FF = imageio_ffmpeg.get_ffmpeg_exe()
-CARTELLA_MUSICA = Path(r"C:\Users\Peppe\OneDrive - Gruppo Ferrovie Dello Stato\Musica\adobe stock acquisti")
-USCITA = QUI.parent / ("Albero di famiglia - Video guida (bozza).mp4" if "--bozza" in sys.argv else "Albero di famiglia - Video guida.mp4")
+# la musica sta nel OneDrive aziendale: il percorso cambia da un PC all'altro
+CARTELLA_MUSICA = next((p for p in (Path(r"D:\OneDrive - Gruppo Ferrovie Dello Stato\Musica\adobe stock acquisti"),
+                                    Path.home() / "OneDrive - Gruppo Ferrovie Dello Stato" / "Musica" / "adobe stock acquisti",
+                                    Path(r"C:\Users\Peppe\OneDrive - Gruppo Ferrovie Dello Stato\Musica\adobe stock acquisti"))
+                        if p.exists()), None)
+# ogni edizione ha il suo file: quelle già consegnate non si sovrascrivono
+EDIZIONE = "v2"   # v2 (23/11/2026): aggiunta la stampa dell'albero
+USCITA = QUI.parent / ("Albero di famiglia - Video guida (bozza).mp4" if "--bozza" in sys.argv else f"Albero di famiglia - Video guida {EDIZIONE}.mp4")
 W, H, FPS = 1920, 1080, 30
 SW, SH = 780, 1688                      # registrazione
 PAUSA = 0.9                             # come in registra.py

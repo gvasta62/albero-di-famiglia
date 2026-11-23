@@ -274,6 +274,29 @@ def main():
         scorri(0)
         fine_scena()
 
+        # ------------------------------------------------------------ stampa
+        scena("stampa")
+        parola("Altro")
+        tocca(".schede button[data-vista=altro]")
+        parola("Stampa")
+        tocca(".opzione:has-text('Stampa')")
+        parola("ramo")
+        tocca("label:has-text('I discendenti di una persona')")
+        parola("foglio")
+        tocca("label:has-text('A4')")
+        parola("verde")
+        pg.locator(".anteprima-stampa").scroll_into_view_if_needed()
+        parola("Stampa")
+        bottone = pg.locator("button:has-text('Stampa o salva in PDF')")
+        bottone.scroll_into_view_if_needed()
+        parola("PDF")
+        # solo il cerchio del tocco: la finestra di stampa vera non si apre durante la registrazione
+        r = bottone.bounding_box()
+        pg.evaluate(f"dispatchEvent(new PointerEvent('pointerdown', {{clientX: {r['x'] + r['width'] / 2}, clientY: {r['y'] + r['height'] / 2}}}))")
+        parola("nitido")
+        pg.locator(".anteprima-stampa").scroll_into_view_if_needed()
+        fine_scena()
+
         # ------------------------------------------------------------ fine
         scena("fine")
         tocca(".schede button[data-vista=altro]")
