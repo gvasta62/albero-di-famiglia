@@ -31,6 +31,17 @@ Si sceglie o si scatta, si ritaglia un quadrato (trascinare, ingrandire con curs
 Si salvano due versioni: 1000x1000 per la scheda, 180x180 per l'albero. Le foto vecchie restano finché
 compaiono in una copia serale o nel registro degli ultimi 90 giorni, poi la copia serale le pulisce.
 
+### Stampa dell'albero
+Altro › **Stampa l'albero** (o il pulsante Stampa sopra l'albero), codice in `app/stampa.js`. Disegna l'albero in **SVG**
+(vettoriale): si stampa dal browser, si salva in PDF scegliendo "Salva come PDF" nella finestra di stampa (resta
+vettoriale), oppure si scarica il file `.svg`. In vita = verde, defunti = grigio con †; in bianco e nero i defunti hanno
+il bordo tratteggiato. Scelte: tutta la famiglia / discendenti / antenati di una persona; foglio A4-A0 (orientamento
+automatico); disposizione dall'alto in basso o da sinistra a destra ("la più leggibile" sceglie quella con i nomi più
+grandi: per le famiglie larghe vince quasi sempre sinistra-destra); con o senza foto. L'anteprima avvisa se sul foglio
+scelto i nomi verrebbero sotto i 7 punti.
+Disposizione: generazioni calcolate dai legami, coniugi affiancati, ordine con baricentri e posizioni con regressione
+isotona (niente sovrapposizioni); le linee orizzontali di gruppi diversi vanno su corsie diverse.
+
 ## Provarla subito
 Aprire `app/index.html?prova` nel browser (o `index.html` senza collegamento al database): parte in **modalità prova**
 con una famiglia inventata (Rossi). Link di prova: `index.html#g=prova-gestore-00000000001` per il gestore,

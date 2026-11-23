@@ -1,6 +1,6 @@
 # Punto della situazione - Albero di famiglia
 
-Aggiornato: 18/11/2026
+Aggiornato: 23/11/2026
 
 ## Richieste dell'utente (tutte nella prima sessione)
 1. Albero con foto, data di nascita, eventuale data di morte, luogo di nascita, tipo di parentela.
@@ -11,6 +11,8 @@ Aggiornato: 18/11/2026
 6. Multi-famiglia: la sua più altre famiglie separate.
 7. Istruzioni visuali, meglio un video: con musica da `OneDrive\Musica\adobe stock acquisti`
    e voce dell'utente "peppe02 v4" su ElevenLabs.
+
+8. (23/11/2026) Stampa dell'albero in vettoriale, a colori per distinguere i defunti.
 
 ## Scelte decise dall'utente
 - Sito autonomo (non Artifact claude.ai): si entra col solo link, senza account.
@@ -49,6 +51,15 @@ Aggiornato: 18/11/2026
       "peppe02" modello eleven_v4, musica Carefree Happy Piano (prova 1, scelta dall'utente il 18/11/2026).
       Registrazione del sito vero in modalità prova (famiglia Rossi inventata). Resta accanto la bozza.
 - [x] Istruzioni illustrate: `Albero di famiglia - Istruzioni.pdf` (2 pagine A4, 10 passi con schermate).
+
+- [x] (23/11/2026) **Stampa dell'albero**: `app/stampa.js`, voce Altro › Stampa l'albero e pulsante Stampa sopra l'albero.
+      SVG vettoriale -> stampa / PDF dalla finestra di stampa / file .svg. Verde in vita, grigio con † i defunti
+      (bianco e nero: bordo tratteggiato). Tutta la famiglia, discendenti o antenati; A4-A0; dall'alto o da sinistra
+      (automatico = nomi più grandi); foto sì/no. Provata in Chrome (Playwright) con la famiglia Rossi (14 persone,
+      PDF A3 e A4 di una pagina, testo vero) e con una famiglia inventata di 90 persone (A1 a 10 punti con disposizione
+      da sinistra; dall'alto sarebbe stata a 4 punti). Nessun errore nella pagina, telefono e PC.
+      Scelte mie: colori verde/grigio come l'app; luogo di nascita sulla carta solo se ci sta intero.
+- [ ] Video-guida e PDF di istruzioni non parlano ancora della stampa (la guida "Come si usa" nell'app sì, passo 6).
 
 ## Punti aperti
 - Importazione da una copia OneDrive in caso di perdita totale del progetto Supabase: non c'è ancora

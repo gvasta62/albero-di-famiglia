@@ -278,3 +278,15 @@ a { color: var(--accento-scuro); }
 .menu-altro { display: grid; gap: 10px; }
 .ingresso { max-width: 520px; margin: 40px auto; text-align: center; }
 .ingresso .logo { width: 64px; height: 64px; margin-bottom: 12px; }
+
+/* stampa dell'albero */
+.anteprima-stampa { background: color-mix(in srgb, var(--linea) 50%, var(--sfondo)); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+.anteprima-stampa .foglio { background: #fff; width: 100%; max-height: 70vh; margin: 0 auto; box-shadow: 0 1px 6px rgba(0,0,0,.25); padding: 1.5%; }
+.anteprima-stampa .foglio svg { display: block; }
+#foglio-stampa { display: none; }
+@media print {
+  body { padding: 0 !important; background: #fff !important; }
+  body > *:not(#foglio-stampa) { display: none !important; }
+  #foglio-stampa { display: block; break-inside: avoid; }
+  #foglio-stampa svg { display: block; }
+}

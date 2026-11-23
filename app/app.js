@@ -409,7 +409,8 @@ VISTE.albero = (vista, s) => {
 
   const cerca = h('input', { type: 'search', class: 'campo-cerca', placeholder: 'Cerca una persona da mettere al centro…', 'aria-label': 'Cerca una persona' });
   cerca.addEventListener('focus', () => { cerca.blur(); scegliPersona('Chi vuoi mettere al centro?', [], x => vai({ v: 'albero', id: x })); });
-  vista.append(h('div', { class: 'cerca-albero' }, cerca));
+  vista.append(h('div', { class: 'cerca-albero' }, cerca,
+    h('button', { type: 'button', class: 'pulsante', onclick: () => vai({ v: 'stampa' }), 'aria-label': 'Stampa l’albero' }, 'Stampa')));
   vista.append(h('p', { class: 'suggerimento' }, 'Tocca una persona per metterla al centro. Tocca quella al centro per aprire la sua scheda.'));
 
   const generazione = (titolo, ...contenuto) => {
@@ -925,6 +926,7 @@ VISTE.altro = vista => {
     h('span', { class: 'icona', 'aria-hidden': 'true' }, icona), h('span', null, h('strong', null, titolo), h('span', null, testo)));
   vista.append(h('h1', { style: 'margin-bottom:14px' }, 'Altro'), h('div', { class: 'menu-altro' },
     voce('✉', 'Invita un familiare', 'Manda il link su WhatsApp, per mail o col codice QR', () => vai({ v: 'invita' })),
+    voce('⎙', 'Stampa l’albero', 'Tutto l’albero su un foglio, in PDF o in SVG, a colori', () => vai({ v: 'stampa' })),
     voce('⟲', 'Copie serali', 'Torna a com’era l’albero una delle sere passate', () => vai({ v: 'copie' })),
     voce('☺', 'Cambia il tuo nome', stato.chi ? 'Ora risulti come: ' + stato.chi : 'Non l’hai ancora indicato', () => chiediNome()),
     stato.ruolo === 'referente' ? voce('✎', 'Nome della famiglia', 'Ora: ' + stato.famiglia.nome, rinominaFamiglia) : null,
@@ -988,7 +990,8 @@ VISTE.guida = vista => {
       passo(3, 'Foto e date', 'Nella scheda di una persona tocca Modifica. Puoi scegliere una foto dal telefono o scattarla, e ritagliare solo il viso. Per le date basta anche il solo anno.'),
       passo(4, 'Se sbagli', 'Nella scheda Novità c’è tutto quello che è stato fatto, da chi e quando: ogni modifica si può annullare. Per tornare indietro di giorni ci sono le copie serali (Altro › Copie serali).'),
       passo(5, 'Invita gli altri', 'Da Altro › Invita un familiare mandi il link su WhatsApp o mostri il codice QR da inquadrare col telefono.'),
-      passo(6, 'Sul telefono come un’app', 'Su iPhone: Condividi › Aggiungi alla schermata Home. Su Android: menu ⋮ › Aggiungi a schermata Home.')));
+      passo(6, 'Stampa l’albero', 'Da Altro › Stampa l’albero (o dal pulsante Stampa sopra l’albero) scegli se stampare tutta la famiglia o solo un ramo e la grandezza del foglio. Chi è in vita è in verde, chi non c’è più in grigio con la croce. Si può salvare anche in PDF.'),
+      passo(7, 'Sul telefono come un’app', 'Su iPhone: Condividi › Aggiungi alla schermata Home. Su Android: menu ⋮ › Aggiungi a schermata Home.')));
 };
 
 /* ================================================================ GESTORE */
